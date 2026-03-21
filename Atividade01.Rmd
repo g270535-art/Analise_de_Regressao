@@ -20,7 +20,8 @@ options(scipen=9999)
 
 ```{r loadpackages}
 #coloque pacotes necessários aqui
-
+install.packages('tinytex')
+tinytex::install_tinytex(dir = "C:/TinyTeX")
 
 ```
 
