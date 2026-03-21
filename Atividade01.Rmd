@@ -2,7 +2,7 @@
 title: "Atividade 01"
 subtitle: "Distribuição Amostral dos Estimadores de Mínimos Quadrados"
 author:
-  - Aluno 1 RA
+  - Guilherme Valverde Freiria RA270535
   - Aluno 2 RA
   - Aluno 3 RA
 header-includes:
