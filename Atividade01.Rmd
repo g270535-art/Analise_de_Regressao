@@ -1,0 +1,123 @@
+---
+title: "Atividade 01"
+subtitle: "Distribuição Amostral dos Estimadores de Mínimos Quadrados"
+author:
+  - Aluno 1 RA
+  - Aluno 2 RA
+  - Aluno 3 RA
+header-includes:
+   - \usepackage[brazil]{babel}
+output:
+ bookdown::pdf_document2:
+     toc: FALSE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+options(scipen=9999)
+```
+
+
+```{r loadpackages}
+#coloque pacotes necessários aqui
+
+
+```
+
+# Introdução
+
+Considerando o modelo de regressão linear simples:
+$$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$$
+
+com as seguintes suposições:
+
+1. $Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i, \quad i=1, 2, \ldots, n$ (linearidade)
+
+2. $\varepsilon_i$ é uma v.a. em que $\mathbb E(\varepsilon_i)=0$ e $Var(\varepsilon_i) = \sigma^2$ desconhecida, para $i = 1, 2, \ldots, n$.
+
+3. $\varepsilon_i$ e $\varepsilon_j$ são não-correlacionados para $i \neq j$, portanto, $Cov(\varepsilon_i, \varepsilon_j) = 0$ para $i \neq j$.
+
+Temos que os estimadores de mínimos quadrados são dados por:
+$$\begin{aligned}
+\hat{\beta}_0 &= \bar{Y} - \hat{\beta}_1 \bar{X} \\
+\hat{\beta}_1 &= \frac{\sum_{i=1}^n (X_i - \bar{X})(Y_i - \bar{Y})}{\sum_{i=1}^n (X_i - \bar{X})^2} = \frac{\sum_{i=1}^n X_i Y_i - n \bar X \bar Y}{\sum_{i=1}^n X_i^2 - n \bar X^2}
+= \frac{S_{XY}}{S_{XX}}
+\end{aligned} $$
+
+Temos as seguintes propriedades:
+
+$$\mathbb E(\hat{\beta}_1) = \beta_1$$
+
+$$\mathbb E(\hat{\beta}_0) = \beta_0$$ 
+
+$$\mathbb Var(\hat{\beta}_1) =\frac{\sigma^2}{\sum_{i=1}^n(X_i-\bar{X})^2}$$
+
+$$Var(\hat{\beta}_0) = \sigma^2 \left( \frac{1}{n} + \frac{\bar{X}^2}{\sum_{i=1}^n (X_i - \bar{X})^2} \right)$$
+
+$$Cov(\hat{\beta}_0, \hat{\beta}_1) = - \sigma^2 \frac{\bar{X}}{\sum_{i=1}^n (X_i - \bar{X})^2} $$
+
+
+$$s^2 = QME = \frac{SQE}{n-2} = \frac{\sum_{i=1}^n (Y_i - \hat{Y}_i)^2}{n-2}$$
+
+Além disso, temos também que o valor esperado da resposta $Y_i$, fixando $X_i$, é $\mathbb E(Y_i) = \beta_0 + \beta_1 X_i$ e a variância da resposta $Y_i$, fixando $X_i$, é $Var(Y_i)=\sigma^2$.
+
+# Objetivos
+
+Usar o método de simulação de Monte Carlo para estudar a distribuição amostral de $\hat{\beta}_0$ e de $\hat{\beta}_1$. A partir dos dados obtidos, comparar os valores de esperança e variância teóricos/reais com os valores observados e estudar qual distribuição aproximada dos estimadores, mesmo quando a distribuição dos erros não é normal, avaliando, com a simulação, a robustez das propriedades do método de mínimos quadrados.
+
+# Metodologia
+
+Para a simulação, definimos uma população de tamanho $N$ com parâmetros fixos. Os erros $\varepsilon_i$ foram gerados a partir de uma distribuição PREENCHA_AQUI_ALGUMA_NAO_NORMAL, garantindo que as suposições de média zero e variância constante sejam respeitadas.
+
+<!-- Descreva abaixo em detalhes os passos que usou na simulação da população, tudo o que é preciso para simular como voce fez. -->
+
+
+<!-- Descreva abaixo como será usada a simulação de Monte Carlo para avaliar a distribuição amostral $\hat{\beta}_0$ e $\hat{\beta}_1$. Qual o tamanho de cada amostra aleatória ($n$) e quantas vezes a simulação será repetida ($B$).  -->
+
+
+
+
+# Resultados e Discussão
+
+## Análise da População Gerada
+
+
+
+```{r,echo=FALSE}
+
+# codigo da simulacao da populaçao 
+
+```
+
+<!-- Comente características da população, estatísticas sumárias e gráficos adequados.  -->
+
+<!-- Nenhum gráfico/tabela deve ser apresentado sem justificativa e motivação. Todos os gráficos devem apresentar caption e estar devidamente citados com cross-reference no texto. -->
+
+<!-- A média amostral e a variância amostral de Y está próxima  aos valores teóricos/reais mencionados na introdução? Justifique e avalie quais seriam os valores teóricos/reais adequados na comparação. -->
+
+
+## Análise da Distribuição Amostral
+
+
+```{r,echo=FALSE}
+
+# codigo da simulacao de monte carlo 
+
+```
+
+
+<!-- Comente características da distribuição amostral de cada estimador, estatísticas sumárias e gráficos adequados. Eles são correlacionados, qual gráfico é adequado para mostrar isso? Qual estatística sumária? Apresente seus resultados e comente -->
+
+
+<!-- Nenhum gráfico/tabela deve ser apresentado sem justificativa e motivação. Todos os gráficos devem apresentar caption e estar devidamente citados com cross-reference no texto. -->
+
+<!-- Compare com o que seria esperado na teoria e discuta. -->
+
+<!-- é razoável considerar que a distribuiçao amostral é aproximadamente normal? justifique baseando-se nos dados. -->
+
+
+
+# Conclusão
+
+
+<!-- Sintetize o que você aprendeu sobre a a distribuição amostral dos estimadores do método de mínimos quadrados mesmo sem normalidade nos erros e como a média/variancia das estimativas se comportou em relação aos valores teóricos/reais. -->
