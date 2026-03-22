@@ -10,6 +10,7 @@ header-includes:
 output:
  bookdown::pdf_document2:
      toc: FALSE
+     #latex_engine: xelatex
 ---
 
 ```{r setup, include=FALSE}
@@ -17,29 +18,41 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 options(scipen=9999)
 ```
 
-
 ```{r loadpackages}
 #coloque pacotes necessários aqui
-install.packages('tinytex')
-tinytex::install_tinytex(dir = "C:/TinyTeX")
+# ==================================================
+# Pacotes necessários
+# ==================================================
+
+# Para gráficos      # caso queira gráficos avançados
+library(ggplot2)
+
+# Para manipulação de dados e tabelas
+library(dplyr)
+
+library(tibble)
+
+# Para gerar tabelas bonitas no RMarkdown
+library(gt)
+
+# Para LaTeX PDF via RMarkdown
+library(tinytex)
 
 ```
 
 # Introdução
 
-Considerando o modelo de regressão linear simples:
-$$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$$
+Considerando o modelo de regressão linear simples: $$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$$
 
 com as seguintes suposições:
 
-1. $Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i, \quad i=1, 2, \ldots, n$ (linearidade)
+1.  $Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i, \quad i=1, 2, \ldots, n$ (linearidade)
 
-2. $\varepsilon_i$ é uma v.a. em que $\mathbb E(\varepsilon_i)=0$ e $Var(\varepsilon_i) = \sigma^2$ desconhecida, para $i = 1, 2, \ldots, n$.
+2.  $\varepsilon_i$ é uma v.a. em que $\mathbb E(\varepsilon_i)=0$ e $Var(\varepsilon_i) = \sigma^2$ desconhecida, para $i = 1, 2, \ldots, n$.
 
-3. $\varepsilon_i$ e $\varepsilon_j$ são não-correlacionados para $i \neq j$, portanto, $Cov(\varepsilon_i, \varepsilon_j) = 0$ para $i \neq j$.
+3.  $\varepsilon_i$ e $\varepsilon_j$ são não-correlacionados para $i \neq j$, portanto, $Cov(\varepsilon_i, \varepsilon_j) = 0$ para $i \neq j$.
 
-Temos que os estimadores de mínimos quadrados são dados por:
-$$\begin{aligned}
+Temos que os estimadores de mínimos quadrados são dados por: $$\begin{aligned}
 \hat{\beta}_0 &= \bar{Y} - \hat{\beta}_1 \bar{X} \\
 \hat{\beta}_1 &= \frac{\sum_{i=1}^n (X_i - \bar{X})(Y_i - \bar{Y})}{\sum_{i=1}^n (X_i - \bar{X})^2} = \frac{\sum_{i=1}^n X_i Y_i - n \bar X \bar Y}{\sum_{i=1}^n X_i^2 - n \bar X^2}
 = \frac{S_{XY}}{S_{XX}}
@@ -49,14 +62,13 @@ Temos as seguintes propriedades:
 
 $$\mathbb E(\hat{\beta}_1) = \beta_1$$
 
-$$\mathbb E(\hat{\beta}_0) = \beta_0$$ 
+$$\mathbb E(\hat{\beta}_0) = \beta_0$$
 
 $$\mathbb Var(\hat{\beta}_1) =\frac{\sigma^2}{\sum_{i=1}^n(X_i-\bar{X})^2}$$
 
 $$Var(\hat{\beta}_0) = \sigma^2 \left( \frac{1}{n} + \frac{\bar{X}^2}{\sum_{i=1}^n (X_i - \bar{X})^2} \right)$$
 
 $$Cov(\hat{\beta}_0, \hat{\beta}_1) = - \sigma^2 \frac{\bar{X}}{\sum_{i=1}^n (X_i - \bar{X})^2} $$
-
 
 $$s^2 = QME = \frac{SQE}{n-2} = \frac{\sum_{i=1}^n (Y_i - \hat{Y}_i)^2}{n-2}$$
 
@@ -72,22 +84,166 @@ Para a simulação, definimos uma população de tamanho $N$ com parâmetros fix
 
 <!-- Descreva abaixo em detalhes os passos que usou na simulação da população, tudo o que é preciso para simular como voce fez. -->
 
+Para a simulação, foi considerada uma população de tamanho $N = 1000$, com parâmetros fixos $\beta_0 = 0$ e $\beta_1 = 1$. A variável explicativa $X$ foi gerada a partir de uma distribuição normal com média zero e variância igual a 2, garantindo variabilidade suficiente nos dados.
+
+Os termos de erro $\varepsilon_i$ foram extraídos de uma distribuição uniforme no intervalo $(-1,1)$, o que assegura que $\mathbb{E}(\varepsilon_i)=0$ e $\mathrm{Var}(\varepsilon_i)=1/3$.
+
+A variável resposta $Y$ foi então construída de acordo com o modelo $$
+Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i, \quad i = 1, \dots, N.
+$$
+
+Dessa forma, obtém-se uma população simulada em que os valores verdadeiros dos parâmetros são conhecidos, permitindo avaliar posteriormente o desempenho dos estimadores obtidos por mínimos quadrados.
 
 <!-- Descreva abaixo como será usada a simulação de Monte Carlo para avaliar a distribuição amostral $\hat{\beta}_0$ e $\hat{\beta}_1$. Qual o tamanho de cada amostra aleatória ($n$) e quantas vezes a simulação será repetida ($B$).  -->
 
+Para avaliar a distribuição amostral dos estimadores $\hat{\beta}_0$ e $\hat{\beta}_1$, foi utilizada a simulação de Monte Carlo. Em cada repetição, foi extraída aleatoriamente, sem reposição, uma amostra de tamanho $n = 100$ da população previamente gerada. Para cada amostra, o modelo de regressão linear foi estimado por mínimos quadrados ordinários, utilizando a função lm, obtendo-se assim os valores de $\hat{\beta}_0$ e $\hat{\beta}_1$.
 
+Esse procedimento foi repetido $B = 1000$ vezes, gerando um conjunto de estimativas para cada coeficiente. Com base nesses resultados, foram calculadas estatísticas como média, variância e desvio padrão, além da construção de histogramas para visualizar a distribuição dos estimadores.
 
+Dessa forma, é possível comparar os resultados empíricos com as propriedades teóricas dos estimadores de MQO, como não viesamento e variância.
 
 # Resultados e Discussão
 
 ## Análise da População Gerada
 
-
-
 ```{r,echo=FALSE}
 
 # codigo da simulacao da populaçao 
 
+# ==================================================
+# 1. Configuração inicial
+# ==================================================
+set.seed(123)
+
+b0 <- 0
+b1 <- 1
+
+N <- 1000   # tamanho da população
+
+# ==================================================
+# 2. Geração da população
+# ==================================================
+x <- rnorm(N, mean = 0, sd = sqrt(2))
+epsilon <- runif(N, -1, 1)
+
+y <- b0 + b1 * x + epsilon
+
+# ==================================================
+# 3. Regressão na população (MQO)
+# ==================================================
+modelo_pop <- lm(y ~ x)
+
+beta0_hat_pop <- coef(modelo_pop)[1]
+beta1_hat_pop <- coef(modelo_pop)[2]
+
+# ==================================================
+# 4. Visualização da população
+# ==================================================
+plot(x, y,
+     main = "Dispersão da População (x, y)",
+     xlab = "x",
+     ylab = "y",
+     pch = 19,
+     col = "darkblue")
+
+# Reta verdadeira
+abline(a = b0, b = b1,
+       col = "red",
+       lwd = 2)
+
+# Reta estimada
+abline(modelo_pop,
+       col = "green",
+       lwd = 2,
+       lty = 2)
+
+legend("topleft",
+       legend = c("Verdadeira", "Estimada (população)"),
+       col = c("red", "green"),
+       lwd = 2,
+       lty = c(1, 2))
+
+# ==================================================
+# 5. Quantidades teóricas (POPULAÇÃO)
+# ==================================================
+
+# Estatísticas de x
+x_bar <- mean(x)
+Sxx <- sum((x - x_bar)^2)
+
+# Variância do erro (U(-1,1))
+sigma2 <- 1/3
+
+# -------------------------------
+# Esperança dos estimadores
+# E(b0^) = b0, E(b1^) = b1
+# -------------------------------
+E_beta0 <- b0
+E_beta1 <- b1
+
+# -------------------------------
+# Variâncias dos estimadores
+# -------------------------------
+Var_beta1 <- sigma2 / Sxx
+
+Var_beta0 <- sigma2 * (1/N + (x_bar^2) / Sxx)
+
+# -------------------------------
+# Covariância
+# -------------------------------
+Cov_beta0_beta1 <- -sigma2 * x_bar / Sxx
+
+# -------------------------------
+# Estimador da variância do erro
+# s^2 = SQE / (n - 2)
+# -------------------------------
+y_hat <- beta0_hat_pop + beta1_hat_pop * x
+SQE <- sum((y - y_hat)^2)
+s2 <- SQE / (N - 2)
+
+# -------------------------------
+# Propriedades de Y | X
+# -------------------------------
+Ey_dado_X <- b0 + b1 * x        # E(Y|X)
+Vy_dado_X <- sigma2             # Var(Y|X)
+
+# ==================================================
+# 6. Organização dos resultados
+# ==================================================
+
+resultado_final <- data.frame(
+  Medida = c("Estimativa",
+             "Esperança",
+             "Variancia",
+             "Cov(B0,B1)",
+             "s^2"),
+  
+  `B0` = c(
+    round(beta0_hat_pop, 6),
+    E_beta0,
+    round(Var_beta0, 6),
+    NA,
+    NA
+  ),
+  
+  `B1` = c(
+    round(beta1_hat_pop, 6),
+    E_beta1,
+    round(Var_beta1, 6),
+    NA,
+    NA
+  ),
+  
+  `Valor Geral` = c(
+    NA,
+    NA,
+    NA,
+    round(Cov_beta0_beta1, 6),
+    round(s2, 6)
+  )
+)
+
+resultado_final
 ```
 
 <!-- Comente características da população, estatísticas sumárias e gráficos adequados.  -->
@@ -96,19 +252,133 @@ Para a simulação, definimos uma população de tamanho $N$ com parâmetros fix
 
 <!-- A média amostral e a variância amostral de Y está próxima  aos valores teóricos/reais mencionados na introdução? Justifique e avalie quais seriam os valores teóricos/reais adequados na comparação. -->
 
-
 ## Análise da Distribuição Amostral
-
 
 ```{r,echo=FALSE}
 
 # codigo da simulacao de monte carlo 
+# ==================================================
+# 7. Simulação de Monte Carlo
+# ==================================================
 
+# M = número de repetições da simulação de Monte Carlo
+# n = tamanho da amostra em cada repetição
+
+M <- 1000
+n <- 100
+
+beta0_hat <- numeric(M)
+beta1_hat <- numeric(M)
+
+for (i in 1:M) {
+  
+  # -------------------------------
+  # Amostragem de tamanho n
+  # -------------------------------
+  indices <- sample(1:N, size = n, replace = FALSE)
+  x_amostra <- x[indices]
+  y_amostra <- y[indices]
+  
+  # -------------------------------
+  # Regressão MQO na amostra
+  # -------------------------------
+  modelo <- lm(y_amostra ~ x_amostra)
+  
+  # -------------------------------
+  # Estimativas dos coeficientes
+  # -------------------------------
+  beta0_hat[i] <- coef(modelo)[1]
+  beta1_hat[i] <- coef(modelo)[2]
+}
+
+# ==================================================
+# 8. Estatísticas Monte Carlo
+# ==================================================
+
+# Médias
+media_b0 <- mean(beta0_hat)
+media_b1 <- mean(beta1_hat)
+
+# Variâncias
+var_b0 <- var(beta0_hat)
+var_b1 <- var(beta1_hat)
+
+# Desvios padrão
+sd_b0 <- sd(beta0_hat)
+sd_b1 <- sd(beta1_hat)
+
+# ==================================================
+# 9. Comparação: Teoria vs Monte Carlo
+# ==================================================
+
+resultados_mc <- data.frame(
+  Parametro = c("B0", "B1"),
+  
+  Valor_Verdadeiro = c(b0, b1),
+  
+  Media_MC = round(c(media_b0, media_b1), 6),
+  
+  Variancia_MC = round(c(var_b0, var_b1), 6),
+  
+  Variancia_Teorica = round(c(Var_beta0, Var_beta1), 6),
+  
+  Desvio_Padrao_MC = round(c(sd_b0, sd_b1), 6)
+)
+
+resultados_mc
+
+# ==================================================
+# 10. Gráficos das distribuições
+# ==================================================
+
+par(mfrow = c(1, 2))
+
+# -------------------------------
+# B0
+# -------------------------------
+hist(beta0_hat,
+     probability = TRUE,
+     main = expression("Distribuição de " ~ hat(beta)[0]),
+     col = "lightblue",
+     border = "black")
+
+lines(density(beta0_hat), lwd = 2)
+
+curve(dnorm(x, mean = media_b0, sd = sd_b0),
+      lwd = 2, lty = 2, add = TRUE)
+
+abline(v = b0, lwd = 2)
+
+# -------------------------------
+# B1
+# -------------------------------
+hist(beta1_hat,
+     probability = TRUE,
+     main = expression("Distribuição de " ~ hat(beta)[1]),
+     col = "lightgreen",
+     border = "black")
+
+lines(density(beta1_hat), lwd = 2)
+
+curve(dnorm(x, mean = media_b1, sd = sd_b1),
+      lwd = 2, lty = 2, add = TRUE)
+
+abline(v = b1, lwd = 2)
+
+par(mfrow = c(1, 1))
+
+# -------------------------------
+# Dispersão conjunta
+# -------------------------------
+plot(beta0_hat, beta1_hat,
+     main = expression("Correlação entre " ~ hat(beta)[0] ~ " e " ~ hat(beta)[1]),
+     xlab = expression(hat(beta)[0]),
+     ylab = expression(hat(beta)[1]),
+     pch = 19,
+     col = "darkblue")
 ```
 
-
 <!-- Comente características da distribuição amostral de cada estimador, estatísticas sumárias e gráficos adequados. Eles são correlacionados, qual gráfico é adequado para mostrar isso? Qual estatística sumária? Apresente seus resultados e comente -->
-
 
 <!-- Nenhum gráfico/tabela deve ser apresentado sem justificativa e motivação. Todos os gráficos devem apresentar caption e estar devidamente citados com cross-reference no texto. -->
 
@@ -116,9 +386,6 @@ Para a simulação, definimos uma população de tamanho $N$ com parâmetros fix
 
 <!-- é razoável considerar que a distribuiçao amostral é aproximadamente normal? justifique baseando-se nos dados. -->
 
-
-
 # Conclusão
-
 
 <!-- Sintetize o que você aprendeu sobre a a distribuição amostral dos estimadores do método de mínimos quadrados mesmo sem normalidade nos erros e como a média/variancia das estimativas se comportou em relação aos valores teóricos/reais. -->
