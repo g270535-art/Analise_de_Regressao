@@ -11,6 +11,7 @@ output:
  bookdown::pdf_document2:
      toc: FALSE
      #latex_engine: xelatex
+     #keep_tex: true
 ---
 
 ```{r setup, include=FALSE}
@@ -106,10 +107,7 @@ Dessa forma, é possível comparar os resultados empíricos com as propriedades 
 
 ## Análise da População Gerada
 
-```{r,echo=FALSE}
-
-# codigo da simulacao da populaçao 
-
+```{r, echo=FALSE}
 # ==================================================
 # 1. Configuração inicial
 # ==================================================
@@ -117,7 +115,6 @@ set.seed(123)
 
 b0 <- 0
 b1 <- 1
-
 N <- 1000   # tamanho da população
 
 # ==================================================
@@ -125,126 +122,65 @@ N <- 1000   # tamanho da população
 # ==================================================
 x <- rnorm(N, mean = 0, sd = sqrt(2))
 epsilon <- runif(N, -1, 1)
-
 y <- b0 + b1 * x + epsilon
 
 # ==================================================
 # 3. Regressão na população (MQO)
 # ==================================================
 modelo_pop <- lm(y ~ x)
-
 beta0_hat_pop <- coef(modelo_pop)[1]
 beta1_hat_pop <- coef(modelo_pop)[2]
 
-# ==================================================
-# 4. Visualização da população
-# ==================================================
-plot(x, y,
-     main = "Dispersão da População (x, y)",
-     xlab = "x",
-     ylab = "y",
-     pch = 19,
-     col = "darkblue")
-
-# Reta verdadeira
-abline(a = b0, b = b1,
-       col = "red",
-       lwd = 2)
-
-# Reta estimada
-abline(modelo_pop,
-       col = "green",
-       lwd = 2,
-       lty = 2)
-
-legend("topleft",
-       legend = c("Verdadeira", "Estimada (população)"),
-       col = c("red", "green"),
-       lwd = 2,
-       lty = c(1, 2))
-
-# ==================================================
-# 5. Quantidades teóricas (POPULAÇÃO)
-# ==================================================
-
-# Estatísticas de x
+# Estatísticas auxiliares
 x_bar <- mean(x)
 Sxx <- sum((x - x_bar)^2)
-
-# Variância do erro (U(-1,1))
-sigma2 <- 1/3
-
-# -------------------------------
-# Esperança dos estimadores
-# E(b0^) = b0, E(b1^) = b1
-# -------------------------------
+sigma2 <- 1/3  # Variância do erro (U(-1,1))
 E_beta0 <- b0
 E_beta1 <- b1
-
-# -------------------------------
-# Variâncias dos estimadores
-# -------------------------------
 Var_beta1 <- sigma2 / Sxx
-
 Var_beta0 <- sigma2 * (1/N + (x_bar^2) / Sxx)
-
-# -------------------------------
-# Covariância
-# -------------------------------
 Cov_beta0_beta1 <- -sigma2 * x_bar / Sxx
+s2 <- sum(residuals(modelo_pop)^2) / (N - 2)
+Ey_dado_X <- b0 + b1 * x
+Vy_dado_X <- sigma
+```
 
-# -------------------------------
-# Estimador da variância do erro
-# s^2 = SQE / (n - 2)
-# -------------------------------
-y_hat <- beta0_hat_pop + beta1_hat_pop * x
-SQE <- sum((y - y_hat)^2)
-s2 <- SQE / (N - 2)
+```{r graficopop, echo=FALSE, fig.cap="Dispersão da população com reta verdadeira (vermelha) e estimada (verde).", fig.pos = 'H'}
 
-# -------------------------------
-# Propriedades de Y | X
-# -------------------------------
-Ey_dado_X <- b0 + b1 * x        # E(Y|X)
-Vy_dado_X <- sigma2             # Var(Y|X)
+# Criar tibble com os dados
+dados <- tibble(x = x, y = y)
 
-# ==================================================
-# 6. Organização dos resultados
-# ==================================================
+# Criar o gráfico
+ggplot(dados, aes(x = x, y = y)) +
+  geom_point(color = "darkblue") +  # Pontos da população
+  geom_abline(intercept = b0, slope = b1, color = "red", size = 1.2) +  # Reta verdadeira
+  geom_abline(intercept = beta0_hat_pop, slope = beta1_hat_pop, color = "green", linetype = "dashed", size = 1) +  # Reta estimada
+  labs(
+    title = "Dispersão da População com Reta Verdadeira e Estimada",
+    x = "x",
+    y = "y"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
 
-resultado_final <- data.frame(
-  Medida = c("Estimativa",
-             "Esperança",
-             "Variancia",
-             "Cov(B0,B1)",
-             "s^2"),
-  
-  `B0` = c(
-    round(beta0_hat_pop, 6),
-    E_beta0,
-    round(Var_beta0, 6),
-    NA,
-    NA
-  ),
-  
-  `B1` = c(
-    round(beta1_hat_pop, 6),
-    E_beta1,
-    round(Var_beta1, 6),
-    NA,
-    NA
-  ),
-  
-  `Valor Geral` = c(
-    NA,
-    NA,
-    NA,
-    round(Cov_beta0_beta1, 6),
-    round(s2, 6)
-  )
+```{r tabela_pop, echo=FALSE}
+
+# Função para arredondar consistentemente
+round6 <- function(x) round(x, 6)
+
+resultado_final <- tibble(
+  Estimador = c("Estimativa", "Esperança", "Variância", "Cov(B0,B1)", "s^2"),
+  B0 = c(round6(beta0_hat_pop), round6(E_beta0), round6(Var_beta0), NA, NA),
+  B1 = c(round6(beta1_hat_pop), round6(E_beta1), round6(Var_beta1), NA, NA),
+  `Valor Geral` = c(NA, NA, NA, round6(Cov_beta0_beta1), round6(s2))
 )
 
-resultado_final
+# Visualização bonita no RMarkdown
+resultado_final %>% gt() %>% tab_header(title = "Resumo da População")
 ```
+
+Como podemos ver na Figura \@ref(fig:graficopop)
 
 <!-- Comente características da população, estatísticas sumárias e gráficos adequados.  -->
 
@@ -255,46 +191,40 @@ resultado_final
 ## Análise da Distribuição Amostral
 
 ```{r,echo=FALSE}
-
-# codigo da simulacao de monte carlo 
 # ==================================================
-# 7. Simulação de Monte Carlo
+# Simulação de Monte Carlo
 # ==================================================
 
-# M = número de repetições da simulação de Monte Carlo
-# n = tamanho da amostra em cada repetição
+# ==================================================
+# 7. Configuração da simulação
+# ==================================================
+B <- 1000   # número de repetições
+n <- 100    # tamanho da amostra em cada repetição
 
-M <- 1000
-n <- 100
+beta0_hat <- numeric(B)
+beta1_hat <- numeric(B)
 
-beta0_hat <- numeric(M)
-beta1_hat <- numeric(M)
-
-for (i in 1:M) {
+# ==================================================
+# 8. Loop da simulação de Monte Carlo
+# ==================================================
+for (i in 1:B) {
   
-  # -------------------------------
   # Amostragem de tamanho n
-  # -------------------------------
   indices <- sample(1:N, size = n, replace = FALSE)
   x_amostra <- x[indices]
   y_amostra <- y[indices]
   
-  # -------------------------------
   # Regressão MQO na amostra
-  # -------------------------------
   modelo <- lm(y_amostra ~ x_amostra)
   
-  # -------------------------------
   # Estimativas dos coeficientes
-  # -------------------------------
   beta0_hat[i] <- coef(modelo)[1]
   beta1_hat[i] <- coef(modelo)[2]
 }
 
 # ==================================================
-# 8. Estatísticas Monte Carlo
+# 9. Estatísticas Monte Carlo
 # ==================================================
-
 # Médias
 media_b0 <- mean(beta0_hat)
 media_b1 <- mean(beta1_hat)
@@ -307,78 +237,89 @@ var_b1 <- var(beta1_hat)
 sd_b0 <- sd(beta0_hat)
 sd_b1 <- sd(beta1_hat)
 
-# ==================================================
-# 9. Comparação: Teoria vs Monte Carlo
-# ==================================================
+```
 
-resultados_mc <- data.frame(
+```{r tabela_teoriavsmc, echo=FALSE}
+# ==================================================
+# 10. Comparação: Teoria vs Monte Carlo
+# ==================================================
+resultados_mc <- tibble(
   Parametro = c("B0", "B1"),
-  
   Valor_Verdadeiro = c(b0, b1),
-  
   Media_MC = round(c(media_b0, media_b1), 6),
-  
   Variancia_MC = round(c(var_b0, var_b1), 6),
-  
   Variancia_Teorica = round(c(Var_beta0, Var_beta1), 6),
-  
   Desvio_Padrao_MC = round(c(sd_b0, sd_b1), 6)
 )
 
-resultados_mc
+# Visualização bonita
+resultados_mc %>% gt() %>% tab_header(title = "Comparação Teoria vs Monte Carlo")
 
-# ==================================================
-# 10. Gráficos das distribuições
-# ==================================================
-
-par(mfrow = c(1, 2))
-
-# -------------------------------
-# B0
-# -------------------------------
-hist(beta0_hat,
-     probability = TRUE,
-     main = expression("Distribuição de " ~ hat(beta)[0]),
-     col = "lightblue",
-     border = "black")
-
-lines(density(beta0_hat), lwd = 2)
-
-curve(dnorm(x, mean = media_b0, sd = sd_b0),
-      lwd = 2, lty = 2, add = TRUE)
-
-abline(v = b0, lwd = 2)
-
-# -------------------------------
-# B1
-# -------------------------------
-hist(beta1_hat,
-     probability = TRUE,
-     main = expression("Distribuição de " ~ hat(beta)[1]),
-     col = "lightgreen",
-     border = "black")
-
-lines(density(beta1_hat), lwd = 2)
-
-curve(dnorm(x, mean = media_b1, sd = sd_b1),
-      lwd = 2, lty = 2, add = TRUE)
-
-abline(v = b1, lwd = 2)
-
-par(mfrow = c(1, 1))
-
-# -------------------------------
-# Dispersão conjunta
-# -------------------------------
-plot(beta0_hat, beta1_hat,
-     main = expression("Correlação entre " ~ hat(beta)[0] ~ " e " ~ hat(beta)[1]),
-     xlab = expression(hat(beta)[0]),
-     ylab = expression(hat(beta)[1]),
-     pch = 19,
-     col = "darkblue")
 ```
 
+```{r graficohistbeta0, echo=FALSE, fig.cap="Histograma da distribuição de B0"}
+# ==================================================
+# 11a. Histograma B0
+# ==================================================
+dados_mc <- tibble(
+  beta0 = beta0_hat,
+  beta1 = beta1_hat
+)
+
+ggplot(dados_mc, aes(x = beta0)) +
+  geom_histogram(aes(y = ..density..), bins = 30, fill = "lightblue", color = "black") +
+  geom_density(lwd = 1.2) +
+  stat_function(fun = dnorm, args = list(mean = media_b0, sd = sd_b0), linetype = "dashed", lwd = 1) +
+  geom_vline(xintercept = b0, color = "red", lwd = 1.2) +
+  labs(
+    title = expression("Distribuição de " ~ hat(beta)[0]),
+    x = expression(hat(beta)[0]),
+    y = "Densidade"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r graficohistbeta1, echo=FALSE, fig.cap="Histograma da distribuição de B1"}
+# ==================================================
+# 11b. Histograma B1
+# ==================================================
+ggplot(dados_mc, aes(x = beta1)) +
+  geom_histogram(aes(y = ..density..), bins = 30, fill = "lightgreen", color = "black") +
+  geom_density(lwd = 1.2) +
+  stat_function(fun = dnorm, args = list(mean = media_b1, sd = sd_b1), linetype = "dashed", lwd = 1) +
+  geom_vline(xintercept = b1, color = "red", lwd = 1.2) +
+  labs(
+    title = expression("Distribuição de " ~ hat(beta)[1]),
+    x = expression(hat(beta)[1]),
+    y = "Densidade"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+```{r graficodispersaob0b1, echo=FALSE, fig.cap="Dispersão conjunta de B0 e B1"}
+# ==================================================
+# 11c. Dispersão conjunta B0 x B1
+# ==================================================
+ggplot(dados_mc, aes(x = beta0, y = beta1)) +
+  geom_point(color = "darkblue", alpha = 0.5) +
+  labs(
+    title = expression("Correlação entre " ~ hat(beta)[0] ~ " e " ~ hat(beta)[1]),
+    x = expression(hat(beta)[0]),
+    y = expression(hat(beta)[1])
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+\@ref(fig:graficodispersaob0b1)
+
 <!-- Comente características da distribuição amostral de cada estimador, estatísticas sumárias e gráficos adequados. Eles são correlacionados, qual gráfico é adequado para mostrar isso? Qual estatística sumária? Apresente seus resultados e comente -->
+
+nte --\>
 
 <!-- Nenhum gráfico/tabela deve ser apresentado sem justificativa e motivação. Todos os gráficos devem apresentar caption e estar devidamente citados com cross-reference no texto. -->
 
