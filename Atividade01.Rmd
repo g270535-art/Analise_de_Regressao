@@ -10,8 +10,6 @@ header-includes:
 output:
  bookdown::pdf_document2:
      toc: FALSE
-     #latex_engine: xelatex
-     #keep_tex: true
 ---
 
 ```{r setup, include=FALSE}
@@ -21,22 +19,11 @@ options(scipen=9999)
 
 ```{r loadpackages}
 #coloque pacotes necessários aqui
-# ==================================================
-# Pacotes necessários
-# ==================================================
 
-# Para gráficos      # caso queira gráficos avançados
 library(ggplot2)
-
-# Para manipulação de dados e tabelas
 library(dplyr)
-
 library(tibble)
-
-# Para gerar tabelas bonitas no RMarkdown
 library(gt)
-
-# Para LaTeX PDF via RMarkdown
 library(tinytex)
 
 ```
@@ -81,27 +68,29 @@ Usar o método de simulação de Monte Carlo para estudar a distribuição amost
 
 # Metodologia
 
-Para a simulação, definimos uma população de tamanho $N$ com parâmetros fixos. Os erros $\varepsilon_i$ foram gerados a partir de uma distribuição PREENCHA_AQUI_ALGUMA_NAO_NORMAL, garantindo que as suposições de média zero e variância constante sejam respeitadas.
+Para a simulação, definimos uma população de tamanho $N$ com parâmetros fixos. Os erros $\varepsilon_i$ foram gerados a partir de uma distribuição uniforme, garantindo que as suposições de média zero e variância constante sejam respeitadas.
 
 <!-- Descreva abaixo em detalhes os passos que usou na simulação da população, tudo o que é preciso para simular como voce fez. -->
 
-Para a simulação, foi considerada uma população de tamanho $N = 1000$, com parâmetros fixos $\beta_0 = 0$ e $\beta_1 = 1$. A variável explicativa $X$ foi gerada a partir de uma distribuição normal com média zero e variância igual a 2, garantindo variabilidade suficiente nos dados.
+Para a simulação, foi considerada uma população de tamanho $N = 1000$, com parâmetros fixos $\beta_0 = 0$ e $\beta_1 = 1$. A variável explicativa $X$ foi gerada a partir de uma distribuição normal com média zero e variância igual a 2. A escolha da variância foi feita com base na inspeção visual do gráfico apresentado na Figura\~\@ref(fig:graficopop), onde se observou que o valor 2 proporciona uma boa dispersão dos dados.
 
-Os termos de erro $\varepsilon_i$ foram extraídos de uma distribuição uniforme no intervalo $(-1,1)$, o que assegura que $\mathbb{E}(\varepsilon_i)=0$ e $\mathrm{Var}(\varepsilon_i)=1/3$.
+Os termos de erro $\varepsilon_i$ foram extraídos de uma distribuição uniforme no intervalo $(-1,1)$. Sabe-se que, para uma variável aleatória $U \sim \text{Unif}(a,b)$, a esperança e a variância são dadas por $$
+\mathbb{E}(U) = \frac{a+b}{2}
+\quad \text{e} \quad
+\mathrm{Var}(U) = \frac{(b-a)^2}{12}.
+$$ No presente caso, com $a = -1$ e $b = 1$, obtém-se $\mathbb{E}(\varepsilon_i) = 0$ e $\mathrm{Var}(\varepsilon_i) = \frac{1}{3}$, satisfazendo a suposição de que $\varepsilon_i$ é uma variável aleatória com média zero e variância constante $\sigma^2$, para $i = 1, 2, \ldots, N$.
 
-A variável resposta $Y$ foi então construída de acordo com o modelo $$
+A variável resposta $Y$ foi então construída de acordo com o modelo de regressão linear simples: $$
 Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i, \quad i = 1, \dots, N.
 $$
 
-Dessa forma, obtém-se uma população simulada em que os valores verdadeiros dos parâmetros são conhecidos, permitindo avaliar posteriormente o desempenho dos estimadores obtidos por mínimos quadrados.
+Dessa forma, obtém-se uma população simulada na qual os valores verdadeiros dos parâmetros são conhecidos.
 
 <!-- Descreva abaixo como será usada a simulação de Monte Carlo para avaliar a distribuição amostral $\hat{\beta}_0$ e $\hat{\beta}_1$. Qual o tamanho de cada amostra aleatória ($n$) e quantas vezes a simulação será repetida ($B$).  -->
 
-Para avaliar a distribuição amostral dos estimadores $\hat{\beta}_0$ e $\hat{\beta}_1$, foi utilizada a simulação de Monte Carlo. Em cada repetição, foi extraída aleatoriamente, sem reposição, uma amostra de tamanho $n = 100$ da população previamente gerada. Para cada amostra, o modelo de regressão linear foi estimado por mínimos quadrados ordinários, utilizando a função lm, obtendo-se assim os valores de $\hat{\beta}_0$ e $\hat{\beta}_1$.
+Para avaliar a distribuição amostral dos estimadores $\hat{\beta}_0$ e $\hat{\beta}_1$, foi utilizada a simulação de Monte Carlo. Em cada repetição, foi extraída aleatoriamente, sem reposição, uma amostra de tamanho $n = 100$ da população previamente gerada. Para cada amostra, o modelo de regressão linear foi estimado por mínimos quadrados ordinários, utilizando a função \texttt{lm()}, obtendo-se assim as estimativas $\hat{\beta}_0$ e $\hat{\beta}_1$.
 
-Esse procedimento foi repetido $B = 1000$ vezes, gerando um conjunto de estimativas para cada coeficiente. Com base nesses resultados, foram calculadas estatísticas como média, variância e desvio padrão, além da construção de histogramas para visualizar a distribuição dos estimadores.
-
-Dessa forma, é possível comparar os resultados empíricos com as propriedades teóricas dos estimadores de MQO, como não viesamento e variância.
+Esse procedimento foi repetido $B = 1000$ vezes, gerando um conjunto de estimativas para cada coeficiente. Com base nesses resultados, foram calculadas estatísticas descritivas, como média, variância e desvio padrão. Além disso, foram construídos histogramas com o objetivo de visualizar a distribuição empírica dos estimadores.
 
 # Resultados e Discussão
 
@@ -143,25 +132,59 @@ Cov_beta0_beta1 <- -sigma2 * x_bar / Sxx
 s2 <- sum(residuals(modelo_pop)^2) / (N - 2)
 Ey_dado_X <- b0 + b1 * x
 Vy_dado_X <- sigma
+
+
 ```
 
-```{r graficopop, echo=FALSE, fig.cap="Dispersão da população com reta verdadeira (vermelha) e estimada (verde).", fig.pos = 'H'}
+```{r graficopop, echo=FALSE, fig.cap="Dispersão da população com reta verdadeira (vermelha) e estimada (verde).", fig.pos='H', dev='pdf'}
 
-# Criar tibble com os dados
+library(ggplot2)
+library(tibble)
+
+# Dados
 dados <- tibble(x = x, y = y)
 
-# Criar o gráfico
+# Labels das equações
+label_true <- paste0("Reta verdadeira: y = ", round(b0,2), " + ", round(b1,2), "x")
+label_est  <- paste0("Reta estimada: y = ", round(beta0_hat_pop,2), " + ", round(beta1_hat_pop,2), "x")
+
+# Data frame só para as retas (resolve a legenda)
+retas <- tibble(
+  tipo = c(label_true, label_est),
+  intercepto = c(b0, beta0_hat_pop),
+  inclinacao = c(b1, beta1_hat_pop)
+)
+
 ggplot(dados, aes(x = x, y = y)) +
-  geom_point(color = "darkblue") +  # Pontos da população
-  geom_abline(intercept = b0, slope = b1, color = "red", size = 1.2) +  # Reta verdadeira
-  geom_abline(intercept = beta0_hat_pop, slope = beta1_hat_pop, color = "green", linetype = "dashed", size = 1) +  # Reta estimada
+  
+  # Pontos (fixos, sem mexer)
+  geom_point(color = "darkblue") +
+  
+  # Retas com legenda
+  geom_abline(data = retas,
+              aes(intercept = intercepto,
+                  slope = inclinacao,
+                  color = tipo,
+                  linetype = tipo),
+              size = 1.2) +
+  
+  scale_color_manual(values = c("red", "green")) +
+  scale_linetype_manual(values = c("solid", "dashed")) +
+  
   labs(
     title = "Dispersão da População com Reta Verdadeira e Estimada",
     x = "x",
-    y = "y"
+    y = "y",
+    color = NULL,
+    linetype = NULL
   ) +
+  
   theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    legend.position = c(0.80, 0.20),
+    legend.background = element_rect(fill = "white", color = "gray70")
+  )
 ```
 
 ```{r tabela_pop, echo=FALSE}
@@ -177,7 +200,7 @@ resultado_final <- tibble(
 )
 
 # Visualização bonita no RMarkdown
-resultado_final %>% gt() %>% tab_header(title = "Resumo da População")
+resultado_final %>% gt() %>% tab_header(title = "Análise dos estimadores")
 ```
 
 Como podemos ver na Figura \@ref(fig:graficopop)
