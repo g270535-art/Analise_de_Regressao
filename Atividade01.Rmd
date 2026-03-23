@@ -90,7 +90,7 @@ Dessa forma, obtém-se uma população simulada na qual os valores verdadeiros d
 
 Para avaliar a distribuição amostral dos estimadores $\hat{\beta}_0$ e $\hat{\beta}_1$, foi utilizada a simulação de Monte Carlo. Em cada repetição, foi extraída aleatoriamente, sem reposição, uma amostra de tamanho $n = 100$ da população previamente gerada. Para cada amostra, o modelo de regressão linear foi estimado por mínimos quadrados ordinários, utilizando a função \texttt{lm()}, obtendo-se assim as estimativas $\hat{\beta}_0$ e $\hat{\beta}_1$.
 
-Esse procedimento foi repetido $B = 1000$ vezes, gerando um conjunto de estimativas para cada coeficiente. Com base nesses resultados, foram calculadas estatísticas descritivas, como média, variância e desvio padrão. Além disso, foram construídos histogramas com o objetivo de visualizar a distribuição empírica dos estimadores.
+Esse procedimento foi repetido $B = 1000$ vezes, gerando um conjunto de estimativas para cada coeficiente. Com base nesses resultados, foram calculadas estatísticas descritivas, como média e variância. Além disso, foram construídos histogramas com o objetivo de visualizar a distribuição dos estimadores.
 
 # Resultados e Discussão
 
@@ -120,20 +120,11 @@ modelo_pop <- lm(y ~ x)
 beta0_hat_pop <- coef(modelo_pop)[1]
 beta1_hat_pop <- coef(modelo_pop)[2]
 
-# Estatísticas auxiliares
-x_bar <- mean(x)
-Sxx <- sum((x - x_bar)^2)
-sigma2 <- 1/3  # Variância do erro (U(-1,1))
-E_beta0 <- b0
-E_beta1 <- b1
-Var_beta1 <- sigma2 / Sxx
-Var_beta0 <- sigma2 * (1/N + (x_bar^2) / Sxx)
-Cov_beta0_beta1 <- -sigma2 * x_bar / Sxx
-s2 <- sum(residuals(modelo_pop)^2) / (N - 2)
-Ey_dado_X <- b0 + b1 * x
-Vy_dado_X <- sigma
+beta0_hat_pop
+beta1_hat_pop
 
-
+media_y <- mean(y)
+var_y <- var(y)
 ```
 
 ```{r graficopop, echo=FALSE, fig.cap="Dispersão da população com reta verdadeira (vermelha) e estimada (verde).", fig.pos='H', dev='pdf'}
@@ -187,23 +178,29 @@ ggplot(dados, aes(x = x, y = y)) +
   )
 ```
 
-```{r tabela_pop, echo=FALSE}
+Para a simulação, considerou-se uma população de tamanho $N = 1000$, com parâmetros $\beta_0 = 0$ e $\beta_1 = 1$. A variável explicativa $X$ foi gerada a partir de uma distribuição normal $N(0,2)$, escolhida para proporcionar boa dispersão, conforme observado na Figura\~\ref{fig:graficopop}.
 
-# Função para arredondar consistentemente
-round6 <- function(x) round(x, 6)
+Os erros $\varepsilon_i$ foram extraídos de uma distribuição uniforme $\text{Unif}(-1,1)$, garantindo $\mathbb{E}(\varepsilon_i) = 0$ e $\mathrm{Var}(\varepsilon_i) = \frac{1}{3}$, satisfazendo a hipótese de média zero e variância constante.
 
-resultado_final <- tibble(
-  Estimador = c("Estimativa", "Esperança", "Variância", "Cov(B0,B1)", "s^2"),
-  B0 = c(round6(beta0_hat_pop), round6(E_beta0), round6(Var_beta0), NA, NA),
-  B1 = c(round6(beta1_hat_pop), round6(E_beta1), round6(Var_beta1), NA, NA),
-  `Valor Geral` = c(NA, NA, NA, round6(Cov_beta0_beta1), round6(s2))
-)
+A variável resposta $Y$ foi definida pelo modelo de regressão linear simples: $$
+Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i, \quad i = 1, \dots, N,
+$$ obtendo-se, assim, uma população simulada com parâmetros verdadeiros conhecidos. Como pode ser observado na Figura\~\ref{fig:graficopop}, após a estimação por mínimos quadrados, obtêm-se $\hat{\beta}_0 = -0{,}003019$ e $\hat{\beta}_1 = 1{,}09906$, conforme apresentado na Tabela\~\ref{tab:tabela_pop}. Nota-se que os valores estimados são próximos dos parâmetros verdadeiros, como esperado.
 
-# Visualização bonita no RMarkdown
-resultado_final %>% gt() %>% tab_header(title = "Análise dos estimadores")
-```
+Como $Y$ é obtida pela soma de uma variável aleatória normal e um termo de erro com distribuição uniforme, conclui-se que sua distribuição não é exatamente normal. No entanto, como a variância de $X$ é maior do que a do termo de erro, a distribuição de $Y$ apresenta formato aproximadamente simétrico, como pode ser observado no histograma da Figura\~\ref{fig:graficohist_y}.
 
-Como podemos ver na Figura \@ref(fig:graficopop)
+A esperança teórica de $Y$ pode ser obtida por: $$
+\mathbb{E}[Y] = \beta_0 + \beta_1 \mathbb{E}[X] + \mathbb{E}[\varepsilon].
+$$ Como $\mathbb{E}[X] = 0$ e $\mathbb{E}[\varepsilon] = 0$, segue que: $$
+\mathbb{E}[Y] = 0.
+$$
+
+Já a variância teórica de $Y$, assumindo independência entre $X$ e $\varepsilon$, é dada por: $$
+\mathrm{Var}(Y) = \beta_1^2 \mathrm{Var}(X) + \mathrm{Var}(\varepsilon).
+$$ Sabendo que $\mathrm{Var}(X) = 2$ e $\mathrm{Var}(\varepsilon) = \frac{1}{3}$, temos: $$
+\mathrm{Var}(Y) = 1^2 \cdot 2 + \frac{1}{3} = \frac{7}{3} \approx 2{,}333.
+$$
+
+Comparando com os valores amostrais obtidos na simulação, tem-se média amostral $\bar{Y} \approx 0{,}0200$ e variância amostral $S_Y^2 \approx 2{,}3474$. Observa-se que tais valores são bastante próximos dos valores teóricos. Essa proximidade é consistente com a Lei dos Grandes Números, dado o tamanho da amostra considerado.
 
 <!-- Comente características da população, estatísticas sumárias e gráficos adequados.  -->
 
@@ -260,23 +257,71 @@ var_b1 <- var(beta1_hat)
 sd_b0 <- sd(beta0_hat)
 sd_b1 <- sd(beta1_hat)
 
+# Estatísticas auxiliares
+x_bar <- mean(x)
+Sxx <- sum((x - x_bar)^2)
+sigma2 <- 1/3  # Variância do erro (U(-1,1))
+E_beta0 <- b0
+E_beta1 <- b1
+Var_beta1 <- sigma2 / Sxx
+Var_beta0 <- sigma2 * (1/N + (x_bar^2) / Sxx)
+Cov_beta0_beta1 <- -sigma2 * x_bar / Sxx
+s2 <- sum(residuals(modelo_pop)^2) / (N - 2)
+Ey_dado_X <- b0 + b1 * x
+Vy_dado_X <- sigma
+# Função para arredondar consistentemente
+
 ```
 
-```{r tabela_teoriavsmc, echo=FALSE}
-# ==================================================
-# 10. Comparação: Teoria vs Monte Carlo
-# ==================================================
-resultados_mc <- tibble(
-  Parametro = c("B0", "B1"),
-  Valor_Verdadeiro = c(b0, b1),
-  Media_MC = round(c(media_b0, media_b1), 6),
-  Variancia_MC = round(c(var_b0, var_b1), 6),
-  Variancia_Teorica = round(c(Var_beta0, Var_beta1), 6),
-  Desvio_Padrao_MC = round(c(sd_b0, sd_b1), 6)
+```{r tabela_pop, echo=FALSE}
+
+library(tibble)
+library(dplyr)
+library(gt)
+
+round6 <- function(x) round(x, 6)
+
+resultado_final <- tibble(
+  Medida = c("Estimativa (população)",
+             "Média Monte Carlo",
+             "Esperança teórica",
+             "Variância Monte Carlo",
+             "Variância teórica",
+             "Desvio padrão Monte Carlo",
+             "Cov(B0,B1)",
+             "s^2"),
+  
+  b0_hat = c(round6(beta0_hat_pop),
+             round6(media_b0),
+             round6(E_beta0),
+             round6(var_b0),
+             round6(Var_beta0),
+             round6(sd_b0),
+             NA,
+             NA),
+  
+  b1_hat = c(round6(beta1_hat_pop),
+             round6(media_b1),
+             round6(E_beta1),
+             round6(var_b1),
+             round6(Var_beta1),
+             round6(sd_b1),
+             NA,
+             NA),
+  
+  Valor_Geral = c(NA, NA, NA, NA, NA, NA,
+                  round6(Cov_beta0_beta1),
+                  round6(s2))
 )
 
-# Visualização bonita
-resultados_mc %>% gt() %>% tab_header(title = "Comparação Teoria vs Monte Carlo")
+resultado_final %>% 
+  gt() %>% 
+  cols_label(
+    b0_hat = md("$\\hat{\\beta}_0$"),
+    b1_hat = md("$\\hat{\\beta}_1$"),
+    Valor_Geral = "Valor Geral"
+  ) %>% 
+  tab_header(title = "Análise dos Estimadores: Teoria vs Monte Carlo")
 
 ```
 
