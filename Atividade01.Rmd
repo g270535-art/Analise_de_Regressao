@@ -13,8 +13,9 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = FALSE)
 options(scipen=9999)
+
 ```
 
 ```{r loadpackages}
@@ -370,8 +371,6 @@ Vy_dado_X <- sigma
 # Supondo que beta0_hat e beta1_hat já estejam preenchidos com B simulações
 cov_beta <- cov(beta0_hat, beta1_hat)
 
-# Exibir o valor da covariância
-cov_beta
 ```
 
 Nesta seção, analisamos a distribuição amostral dos estimadores $\hat{\beta}_0$ e $\hat{\beta}_1$ com base em simulações de Monte Carlo, com o objetivo de comparar os resultados empíricos com as propriedades teóricas conhecidas. Em termos de estatísticas sumárias, a média amostral obtida por Monte Carlo é $$
@@ -394,9 +393,9 @@ também muito próximas das variâncias teóricas
 
 $$
 \mathrm{Var}(\hat{\beta}_0) \approx 0{,}000333 \quad \text{e} \quad \mathrm{Var}(\hat{\beta}_1) \approx 0{,}00017,
-$$ também muito próximas das variâncias teóricas $$
-0{,}000333 \quad \text{e} \quad 0{,}00017,
-$$ respectivamente, como apresentado na Tabela \ref{tab:resultado}.
+$$
+
+respectivamente, como apresentado na Tabela \ref{tab:resultado}.
 
 Com base nas expressões dos estimadores $\hat{\beta}_0$ e $\hat{\beta}_1$, temos:
 
