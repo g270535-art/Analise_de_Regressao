@@ -68,29 +68,55 @@ Usar o método de simulação de Monte Carlo para estudar a distribuição amost
 
 # Metodologia
 
-Para a simulação, definimos uma população de tamanho $N$ com parâmetros fixos. Os erros $\varepsilon_i$ foram gerados a partir de uma distribuição uniforme, garantindo que as suposições de média zero e variância constante sejam respeitadas.
-
 <!-- Descreva abaixo em detalhes os passos que usou na simulação da população, tudo o que é preciso para simular como voce fez. -->
 
-Para a simulação, foi considerada uma população de tamanho $N = 1000$, com parâmetros fixos $\beta_0 = 0$ e $\beta_1 = 1$. A variável explicativa $X$ foi gerada a partir de uma distribuição normal com média zero e variância igual a 2. A escolha da variância foi feita com base na inspeção visual do gráfico apresentado na Figura\~\@ref(fig:graficopop), onde se observou que o valor 2 proporciona uma boa dispersão dos dados.
+Para a simulação, foi considerada inicialmente uma população da variável preditora $X$ de tamanho $N = 1000$, gerada a partir de uma distribuição normal com média zero e variância igual a 2, isto é,
 
-Os termos de erro $\varepsilon_i$ foram extraídos de uma distribuição uniforme no intervalo $(-1,1)$. Sabe-se que, para uma variável aleatória $U \sim \text{Unif}(a,b)$, a esperança e a variância são dadas por $$
-\mathbb{E}(U) = \frac{a+b}{2}
-\quad \text{e} \quad
-\mathrm{Var}(U) = \frac{(b-a)^2}{12}.
-$$ No presente caso, com $a = -1$ e $b = 1$, obtém-se $\mathbb{E}(\varepsilon_i) = 0$ e $\mathrm{Var}(\varepsilon_i) = \frac{1}{3}$, satisfazendo a suposição de que $\varepsilon_i$ é uma variável aleatória com média zero e variância constante $\sigma^2$, para $i = 1, 2, \ldots, N$.
-
-A variável resposta $Y$ foi então construída de acordo com o modelo de regressão linear simples: $$
-Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i, \quad i = 1, \dots, N.
+$$
+X_i \sim \mathcal{N}(0, 2), \quad i = 1, 2, \ldots, N
 $$
 
-Dessa forma, obtém-se uma população simulada na qual os valores verdadeiros dos parâmetros são conhecidos.
+Os termos de erro $\varepsilon_i$, para $i = 1, 2, \ldots, N$, foram extraídos de uma distribuição uniforme no intervalo $(-1,1)$. Sabe-se que, para uma variável aleatória $U \sim \text{Unif}(a,b)$, a esperança e a variância são dadas por:
+
+$$
+\mathbb{E}(U) = \frac{a+b}{2}
+\quad \text{e} \quad
+\mathrm{Var}(U) = \frac{(b-a)^2}{12}
+$$
+
+No presente caso, com $a = -1$ e $b = 1$, obtém-se:
+
+$$
+\mathbb{E}(\varepsilon_i) = 0
+\quad \text{e} \quad
+\mathrm{Var}(\varepsilon_i) = \frac{1}{3}
+$$
+
+satisfazendo a suposição de que $\varepsilon_i$ possui média zero e variância constante $\sigma^2$.
+
+A variável resposta $Y$ foi construída de acordo com o modelo de regressão linear simples:
+
+$$
+Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i, \quad i = 1, \dots, N
+$$
+
+com parâmetros fixos $\beta_0 = 0$ e $\beta_1 = 1$.
+
+Dessa forma, obtém-se uma população simulada na qual os valores verdadeiros dos parâmetros são conhecidos, permitindo a avaliação do desempenho dos estimadores.
+
+Com base na população simulada, foram elaborados gráficos de dispersão (\textit{scatter plots}) para analisar a relação entre $X$ e $Y$, bem como a reta de regressão ajustada, conforme ilustrado na Figura\~\ref{fig:graficopop}.
+
+Adicionalmente, apresenta-se um histograma da variável $Y$ (Figura\~\ref{fig:graficohisty}), com o objetivo de examinar sua distribuição.
 
 <!-- Descreva abaixo como será usada a simulação de Monte Carlo para avaliar a distribuição amostral $\hat{\beta}_0$ e $\hat{\beta}_1$. Qual o tamanho de cada amostra aleatória ($n$) e quantas vezes a simulação será repetida ($B$).  -->
 
-Para avaliar a distribuição amostral dos estimadores $\hat{\beta}_0$ e $\hat{\beta}_1$, foi utilizada a simulação de Monte Carlo. Em cada repetição, foi extraída aleatoriamente, sem reposição, uma amostra de tamanho $n = 100$ da população previamente gerada. Para cada amostra, o modelo de regressão linear foi estimado por mínimos quadrados ordinários, utilizando a função \texttt{lm()}, obtendo-se assim as estimativas $\hat{\beta}_0$ e $\hat{\beta}_1$.
+Para avaliar a distribuição amostral dos estimadores $\hat{\beta}_0$ e $\hat{\beta}_1$, foi utilizada a simulação de Monte Carlo. Em cada repetição, foi extraída aleatoriamente, sem reposição, uma amostra de tamanho $n = 500$ da população previamente gerada, composta pelas variáveis $X$ e $Y$. Para cada amostra, o modelo de regressão linear foi estimado por mínimos quadrados ordinários, utilizando a função \texttt{lm()}, obtendo-se as estimativas $\hat{\beta}_0$ e $\hat{\beta}_1$.
 
-Esse procedimento foi repetido $B = 1000$ vezes, gerando um conjunto de estimativas para cada coeficiente. Com base nesses resultados, foram calculadas estatísticas descritivas, como média e variância. Além disso, foram construídos histogramas com o objetivo de visualizar a distribuição dos estimadores.
+Esse procedimento foi repetido $B = 100000$ vezes, gerando um conjunto de estimativas para cada coeficiente. Com base nesses resultados, foram calculadas estatísticas descritivas, como média e variância, a fim de compará-las com as expressões teóricas apresentadas na introdução.
+
+Além disso, foram elaborados histogramas com o objetivo de visualizar a distribuição dos estimadores $\hat{\beta}_0$ e $\hat{\beta}_1$, conforme ilustrado nas Figuras\~\ref{fig:graficohistbeta0} e\~\ref{fig:graficohistbeta1}.
+
+Adicionalmente, foi construído um gráfico de dispersão (Figura\~\ref{fig:graficodispersaob0b1}) para analisar a relação entre os estimadores, com a finalidade de avaliar a possível correlação entre eles e verificar a validade da suposição de independência dos erros (hipótese 3 do modelo de regressão linear).
 
 # Resultados e Discussão
 
@@ -120,63 +146,8 @@ modelo_pop <- lm(y ~ x)
 beta0_hat_pop <- coef(modelo_pop)[1]
 beta1_hat_pop <- coef(modelo_pop)[2]
 
-beta0_hat_pop
-beta1_hat_pop
-
 media_y <- mean(y)
 var_y <- var(y)
-```
-
-```{# {r graficopop, echo=FALSE, fig.cap="Dispersão da população e reta de regressão.", dev='pdf'}
-# 
-# library(ggplot2)
-# library(tibble)
-# 
-# # Dados
-# dados <- tibble(x = x, y = y)
-# 
-# # Labels (só para texto)
-# label_est <- paste0("Regressão: y = ", round(beta0_hat_pop,2),
-#                     " + ", round(beta1_hat_pop,2), "x")
-# 
-# ggplot(dados, aes(x = x, y = y)) +
-#   
-#   # Pontos
-#   geom_point(aes(color = "Dispersão de (x, y)")) +
-#   
-#   # Reta estimada
-#   geom_abline(
-#     aes(color = "Regressão", linetype = "Regressão"),
-#     intercept = beta0_hat_pop,
-#     slope = beta1_hat_pop,
-#     linewidth = 1.2
-#   ) +
-#   
-#   scale_color_manual(values = c(
-#     "Dispersão de (x, y)" = "darkblue",
-#     "Regressão" = "red"
-#   )) +
-#   
-#   scale_linetype_manual(values = c(
-#     "Regressão" = "solid"
-#   )) +
-#   
-#   labs(
-#     title = "Dispersão da População e Reta de Regressão",
-#     subtitle = label_est,  # equação aqui 
-#     x = "x",
-#     y = "y",
-#     color = NULL,
-#     linetype = NULL
-#   ) +
-#   
-#   theme_minimal() +
-#   theme(
-#     plot.title = element_text(hjust = 0.5),
-#     plot.subtitle = element_text(hjust = 0.5),
-#     legend.position = c(0.80, 0.20),
-#     legend.background = element_rect(fill = "white", color = "gray70")
-#   )
 ```
 
 ```{r graficopop, echo=FALSE, fig.cap="Dispersão da população com reta de regressão.", dev='pdf'}
@@ -249,7 +220,8 @@ ggplot(dados_y, aes(x = y)) +
   stat_function(
     aes(color = "Normal teórica"),
     fun = dnorm,
-    args = list(mean = media_y, sd = sqrt(var_y)),
+    #args = list(mean = media_y, sd = sqrt(var_y)),
+    args = list(mean = 0, sd = sqrt(7/3)),
     linetype = "dashed",
     linewidth = 1
   ) +
@@ -306,12 +278,6 @@ guides(
 
 ```
 
-Para a simulação, considerou-se uma população de tamanho $N = 1000$. A variável explicativa $X$ foi gerada a partir de uma distribuição normal $N(0,2)$. Os erros $\varepsilon_i$ foram extraídos de uma distribuição uniforme $\text{Unif}(-1,1)$, garantindo $\mathbb{E}(\varepsilon_i) = 0$ e $\mathrm{Var}(\varepsilon_i) = \frac{1}{3}$, satisfazendo a hipótese de média zero e variância constante.
-
-A variável resposta $Y$ foi definida pelo modelo de regressão linear simples: $$
-Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i, \quad i = 1, \dots, N,
-$$ com parâmetros verdadeiros $\beta_0 = 0$ e $\beta_1 = 1$, obtendo-se, assim, uma população simulada com parâmetros conhecidos.
-
 Como pode ser observado na Figura\~\ref{fig:graficopop}, após a estimação por mínimos quadrados, obtêm-se $\hat{\beta}_0 = -0{,}003019$ e $\hat{\beta}_1 = 1{,}09906$, conforme apresentado na Tabela\~\ref{tab:tabela_pop}. Nota-se que os valores estimados são próximos dos parâmetros verdadeiros, como esperado.
 
 A esperança de $Y$ é dada por: $$
@@ -346,8 +312,8 @@ Comparando com os valores amostrais obtidos na simulação, tem-se média amostr
 # ==================================================
 # 7. Configuração da simulação
 # ==================================================
-B <- 1000   # número de repetições
-n <- 100    # tamanho da amostra em cada repetição
+B <- 100000   # número de repetições
+n <- 500    # tamanho da amostra em cada repetição
 
 beta0_hat <- numeric(B)
 beta1_hat <- numeric(B)
@@ -399,6 +365,7 @@ Ey_dado_X <- b0 + b1 * x
 Vy_dado_X <- sigma
 # Função para arredondar consistentemente
 
+
 ```
 
 ```{r tabela_pop_final_arredondada, echo=FALSE}
@@ -414,11 +381,11 @@ round_or_blank <- function(x) {
 # Criar tabela já com valores arredondados
 resultado_final <- tibble(
   Medida = c("Estimativa (Regressão)",
-             "Média Monte Carlo",
+             "Média amostral (MC)",
              "Esperança teórica",
-             "Variância Monte Carlo",
+             "Variância amostral (Mc)",
              "Variância teórica",
-             "Cov(B0,B1)",
+             "Cov(B0, B1)",
              "s²"),
   
   b0_hat = c(round(beta0_hat_pop,6),
@@ -449,7 +416,7 @@ resultado_final %>%
   cols_label(
     b0_hat = md("$\\hat{\\beta}_0$"),
     b1_hat = md("$\\hat{\\beta}_1$"),
-    Valor_Geral = md("Valor Geral")
+    Valor_Geral = md("")
   ) %>%
   tab_spanner(
     label = "Estimadores",
@@ -492,7 +459,7 @@ ggplot(dados_mc, aes(x = beta0)) +
   stat_function(
     aes(color = "Normal teórica"),
     fun = dnorm,
-    args = list(mean = media_b0, sd = sd_b0),
+    args = list(mean = b0, sd = sqrt(Var_beta0)),
     linetype = "dashed",
     linewidth = 1
   ) +
@@ -546,14 +513,16 @@ ggplot(dados_mc, aes(x = beta0)) +
   )
 ```
 
-```         
-```
-
 ```{r graficohistbeta1, echo=FALSE, fig.cap="Histograma dos valores de B1 obtidos via simulação Monte Carlo"}
+
 library(ggplot2)
 library(tibble)
 
-# Histograma de beta1
+dados_mc <- tibble(
+  beta0 = beta0_hat,
+  beta1 = beta1_hat
+)
+
 ggplot(dados_mc, aes(x = beta1)) +
   geom_histogram(aes(y = ..density..),
                  bins = 30,
@@ -571,7 +540,7 @@ ggplot(dados_mc, aes(x = beta1)) +
   stat_function(
     aes(color = "Normal teórica"),
     fun = dnorm,
-    args = list(mean = media_b1, sd = sd_b1),
+    args = list(mean = b1, sd = sqrt(Var_beta1)),
     linetype = "dashed",
     linewidth = 1
   ) +
@@ -583,7 +552,7 @@ ggplot(dados_mc, aes(x = beta1)) +
     key_glyph = "path"
   ) +
   
-  # Escala de cores e ordem da legenda
+  # Escala de cores da legenda
   scale_color_manual(
     name = "",
     values = c(
@@ -591,7 +560,7 @@ ggplot(dados_mc, aes(x = beta1)) +
       "Valor verdadeiro de beta1" = "red",
       "Normal teórica" = "blue"
     ),
-    breaks = c("Densidade empírica", "Valor verdadeiro de beta1", "Normal teórica")  # força a ordem
+    breaks = c("Densidade empírica", "Valor verdadeiro de beta1", "Normal teórica")
   ) +
   
   # Ajustes da legenda
@@ -606,7 +575,6 @@ ggplot(dados_mc, aes(x = beta1)) +
   ) +
   
   labs(
-    #title = expression("Distribuição de " ~ hat(beta)[1]),
     title = expression(paste("Distribuição estimada de ", hat(beta)[1], " via simulação Monte Carlo")),
     x = expression(hat(beta)[1]),
     y = "Densidade"
@@ -639,15 +607,94 @@ ggplot(dados_mc, aes(x = beta0, y = beta1)) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
 
+
 ```
 
 \@ref(fig:graficodispersaob0b1)
 
 <!-- Comente características da distribuição amostral de cada estimador, estatísticas sumárias e gráficos adequados. Eles são correlacionados, qual gráfico é adequado para mostrar isso? Qual estatística sumária? Apresente seus resultados e comente -->
 
-nte --\>
+Pela teoria temos que
 
-<!-- Nenhum gráfico/tabela deve ser apresentado sem justificativa e motivação. Todos os gráficos devem apresentar caption e estar devidamente citados com cross-reference no texto. -->
+Vimos que, sem a suposição de distribuição de probabilidade para os erros, temos apenas os momentos definidos, ou seja:
+
+$$
+\mathbb{E}(\hat{\beta}_1) = \beta_1
+\quad \text{e} \quad
+\mathrm{Var}(\hat{\beta}_1) = \frac{\sigma^2}{\sum_{i=1}^{n}(X_i - \bar{X})^2}
+$$
+
+Supondo que $\varepsilon_i \overset{iid}{\sim} \mathcal{N}(0, \sigma^2)$, temos que a distribuição de $\hat{\beta}_1$ é dada por:
+
+$$
+\hat{\beta}_1 \sim \mathcal{N} \left( \beta_1,\; \frac{\sigma^2}{\sum_{i=1}^{n}(X_i - \bar{X})^2} \right)
+$$
+
+Pela teoria, os estimadores MQO possuem as seguintes propriedades:
+
+$$
+\mathbb{E}(\hat{\beta}_0) = \beta_0, \quad
+\mathbb{E}(\hat{\beta}_1) = \beta_1
+$$
+
+$$
+\mathrm{Var}(\hat{\beta}_0) = \sigma^2 \left( \frac{1}{n} + \frac{\bar{X}^2}{\sum_{i=1}^{n}(X_i - \bar{X})^2} \right), \quad
+\mathrm{Var}(\hat{\beta}_1) = \frac{\sigma^2}{\sum_{i=1}^{n}(X_i - \bar{X})^2}
+$$
+
+$$
+\mathrm{Cov}(\hat{\beta}_0, \hat{\beta}_1) = - \frac{\sigma^2 \bar{X}}{\sum_{i=1}^{n}(X_i - \bar{X})^2}
+$$
+
+Supondo $$\varepsilon_i \overset{iid}{\sim} \mathcal{N}(0, \sigma^2)$$, a distribuição amostral de $$\hat{\beta}_1$$ é dada por
+
+$$
+\hat{\beta}_1 \sim \mathcal{N} \left( \beta_1, \frac{\sigma^2}{\sum_{i=1}^{n}(X_i - \bar{X})^2} \right)
+$$
+
+e de forma análoga para $$\hat{\beta}_0$$.
+
+A Tabela\~\ref{tab:tabela_pop_final_arredondada} apresenta os resultados obtidos a partir da simulação Monte Carlo, comparando-os com as expectativas teóricas.
+
+Como pode ser observado nas Figuras\~\ref{fig:graficohistbeta0} e \ref{fig:graficohistbeta1}, os histogramas das estimativas $\hat{\beta}_0$ e $\hat{\beta}_1$ apresentam formato aproximadamente simétrico e campanulado. Sobrepostos aos histogramas estão as curvas da densidade teórica normal:
+
+$$
+\hat{\beta}_0 \sim \mathcal{N}\Big(\beta_0, \mathrm{Var}(\hat{\beta}_0)\Big), \quad
+\hat{\beta}_1 \sim \mathcal{N}\Big(\beta_1, \mathrm{Var}(\hat{\beta}_1)\Big),
+$$
+
+onde $\beta_0 = 0$, $\beta_1 = 1$ e as variâncias são dadas pelas fórmulas teóricas:
+
+$$
+\mathrm{Var}(\hat{\beta}_0) = \sigma^2 \left( \frac{1}{n} + \frac{\bar{X}^2}{\sum_{i=1}^{n}(X_i - \bar{X})^2} \right), \quad
+\mathrm{Var}(\hat{\beta}_1) = \frac{\sigma^2}{\sum_{i=1}^{n}(X_i - \bar{X})^2}.
+$$
+
+A densidade empírica obtida dos histogramas não difere significativamente da densidade teórica, indicando que, mesmo que os erros não sejam normais, os estimadores $\hat{\beta}_0$ e $\hat{\beta}_1$ apresentam distribuição aproximadamente normal para amostras grandes ($n = 500$).
+
+Em termos de estatísticas sumárias, a média amostral obtida por Monte Carlo é $\bar{\hat{\beta}}_0 \approx -0{,}00312$ e $\bar{\hat{\beta}}_1 \approx 1{,}00988$, próximas das expectativas teóricas $\mathbb{E}[\hat{\beta}_0] = 0$ e $\mathbb{E}[\hat{\beta}_1] = 1$. As variâncias amostrais são $\mathrm{Var}(\hat{\beta}_0) \approx 0{,}000342$ e $\mathrm{Var}(\hat{\beta}_1) \approx 0{,}000187$, valores muito próximos das variâncias teóricas $0{,}000333$ e $0{,}00017$, respectivamente.
+
+A covariância entre os estimadores é pequena e negativa ($\mathrm{Cov}(\hat{\beta}_0, \hat{\beta}_1) \approx -0{,}000004$), evidenciando uma leve correlação negativa. Essa correlação é visualizada na Figura\~\ref{fig:graficodispersaob0b1}, onde a nuvem de pontos apresenta formato elíptico. Além disso, essa aparência elíptica confirma que os erros são não-correlacionados, ou seja:
+
+$$
+\mathrm{Cov}(\varepsilon_i, \varepsilon_j) = 0, \quad i \neq j.
+$$
+
+Como exemplo numérico, podemos observar que os valores estimados via MQO foram $\hat{\beta}_0 = -0{,}003019$ e $\hat{\beta}_1 = 1{,}009906$, próximos dos parâmetros verdadeiros, como esperado.
+
+A análise completa de Monte Carlo confirma que os estimadores MQO:
+
+Como conclusão, os resultados da simulação Monte Carlo indicam que os estimadores MQO:
+
+São aproximadamente não viesados, apresentando médias amostrais próximas dos valores teóricos;
+
+Possuem variâncias compatíveis com a teoria, mostrando boa precisão;
+
+Têm distribuição amostral aproximadamente normal, mesmo que os erros não sejam normais;
+
+Apresentam correlação negativa fraca, evidenciada pelo gráfico de dispersão elíptico.
+
+A Tabela\~\ref{tab:tabela_pop_final_arredondada} e as Figuras\~\ref{fig:graficohistbeta0}, \ref{fig:graficohistbeta1} e \ref{fig:graficodispersaob0b1} fornecem suporte numérico e visual para essas conclusões.
 
 <!-- Compare com o que seria esperado na teoria e discuta. -->
 
