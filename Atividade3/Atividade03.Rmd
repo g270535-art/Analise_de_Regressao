@@ -1,0 +1,157 @@
+---
+title: "Atividade 03"
+author:
+  - Aluno 1 RA
+  - Aluno 2 RA
+  - Aluno 3 RA
+output:
+ bookdown::pdf_document2:
+     toc: FALSE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo=FALSE)
+```
+
+**Exercício 1** Leia o enunciado do [Exercício 1.6 do Weisberg](https://ebookcentral.proquest.com/lib/unicamp-ebooks/reader.action?docID=7103845&ppg=41). O conjunto de dados tem nome `Rateprof` e está disponível no pacote `alr4`.
+
+```{r, message=FALSE}
+library(alr4)
+data("Rateprof")
+```
+
+Apresente abaixo um gráfico similar ao apresentado no enunciado. Comente sobre as relações entre as notas dos cinco quesitos avaliados.
+
+```{r}
+
+# seu código aqui
+
+```
+
+\newpage
+
+**Exercício 2** Considere o conjunto de dados `MA_schools` do pacote `moderndive`. Há interesse em predizer `average_sat_math` a partir da variável `perc_disadvan`.
+
+```{r}
+library(moderndive)
+data(MA_schools)
+```
+
+A)  Explique o que são as variáveis `average_sat_math` e `perc_disadvan`. Apresente estatísticas sumárias das duas variáveis de interesse, inclua o tamanho amostra. Apresente um diagrama de dispersão e use o mesmo para argumentar sobre uma regressão linear simples nos dados parecer ou não apropriada e qual seria o objetivo do modelo.
+
+```{r}
+# coloque os comandos  aqui
+# gráficos devem ter "labels" adequados nos eixos, o nome bruto da variável, como indicado na coluna do dataset não deve ser apresentado no gráfico e/ou tabelas. 
+
+```
+
+B)  Calcule, usando o R, os valores de $\bar{x}$, $\bar{y}$, $S_{XX}$, $S_{YY}$, $S_{XY}$. Calcule as estimativas para $\beta_0$ e $\beta_1$ da regressão linear de $Y$ em $X$ usando os valores calculados. Apresente novamente o gráfico de dispersão, mas agora incluindo a reta ajustada.
+
+```{r, echo=TRUE}
+# coloque os comandos para os cálculos
+# nao usar a função lm aqui
+# usar echo=TRUE
+# apague esses comentários antes de entregar
+
+```
+
+C)  Calcule, usando o R, uma estimativa para $\sigma^2$ e encontre os erros padrões de $\hat{\beta}_0$ e $\hat{\beta}_1$. Calcule $\widehat{Cov}(\hat{\beta}_0,\hat{\beta}_1)$.
+
+```{r, echo = TRUE}
+# coloque os comandos para os cálculos
+# nao usar a função lm aqui
+# usar echo=TRUE
+# apague esses comentários antes de entregar
+```
+
+D)  Calcule, usando o R, a estatística do teste para $H_0: \beta_1=0$. Apresente o p-valor para o teste bilateral. Descreva e interprete o resultado em termos do problema.
+
+```{r}
+# coloque os comandos para os cálculos
+# nao usar a função lm aqui
+# escreva no texto com r inline os resultados da estatística do teste, do p-valor, etc...
+```
+
+E)  Calcule, usando o R, um intervalo de confiança de 95% para $\beta_1$. Descreva e interprete o resultado em termos do problema.
+
+```{r}
+# coloque os comandos para os cálculos
+# nao usar a função lm aqui
+
+```
+
+F)  Apresente os resultados usando as funções `lm`, `vcov` e `confint`.
+
+```{r}
+# coloque os comandos para os cálculos
+
+```
+
+\newpage
+
+<!-- **Exercício 3** Utilize o conjunto de dados `Heights` do pacote `alr4`. -->
+
+**Exercício 3** Alguns países exibem altas taxas de fertilidade, enquanto outros apresentam baixas taxas. Existe uma associação entre a taxa de fertilidade e a expectativa de vida? Utilize o conjunto de dados `un_member_states_2024` do pacote `moderndive` para avaliar esta possível associação. Para informações do conjunto de dados, use `?un_member_states_2024`.
+
+```{r, echo=FALSE}
+# carregando os dados
+library(moderndive)
+data(un_member_states_2024)
+```
+
+A)  Apresente estatísticas sumárias e gráficos adequados. Ao apresentar cada resultado, mencione o propósito, relacionando ao problema e aos próximos passos que você tomará na modelagem.
+
+```{r}
+library(tidyverse)
+
+# tidy_summary pode ajudar aqui e demais funçoes do tidyverse
+
+```
+
+B)  Ajuste um modelo de regressão linear simples adequado para o problema. Apresente as estimativas, erros-padrão, coeficiente de determinação e estimativa da variância do erro. Escreva uma ou duas sentenças que resumam os resultados encontrados com esses cálculos.
+
+```{r}
+# coloque os comandos para os cálculos
+
+```
+
+C)  Apresente um intervalo de confiança para $\beta_1$ de 95%. Descreva e interprete o resultado em termos do problema.
+
+```{r}
+# coloque os comandos para os cálculos
+
+```
+
+D)  Apresente um intervalo de confiança de 95% para a taxa de fertilidade média entre países em que a expectativa de vida é de 70 anos. Descreva e interprete o resultado em termos do problema.
+
+```{r}
+# coloque os comandos para os cálculos
+
+```
+
+E)  Apresente um intervalo de predição de 95% para a taxa de fertilidade de um país em que a expectativa de vida é de 70 anos. Descreva e interprete o resultado em termos do problema.
+
+```{r}
+# coloque os comandos para os cálculos
+
+```
+
+\newpage
+
+**Exercício 4** Em muitos problemas, o analista de dados pode focar no erro de predição médio de um modelo de regressão para descrever a acurácia esperada para predições futuras ou para ajudar na escolha entre modelos de regressão alternativos que podem ter sido ajustados aos dados. Quando temos um tamanho amostral suficiente, podemos usar a técnica de *validação cruzada*. A técnica consiste em dividirmos os dados em duas partes que podemos chamar de *treino* e *validação*. O subconjunto *treino* é utilizado para ajustar o modelo e obter as estimativas e o subconjunto *validação* é usado para testar a acurácia das predições.
+
+A)  Considere o conjunto de dados do **Exercício 2**. Selecione, ao acaso, aproximadamente $2/3$ dos dados para o *treino* (use o comando `set.seed`). O $1/3$ restante serão o subconjunto *validação*. Considerando apenas o subconjunto *treino*, ajuste um modelo de regressão.
+
+```{r}
+# coloque os comandos
+
+```
+
+B)  Considerando o modelo de regressão ajustado, obtenha predições para a variável resposta usando os valores dos preditores do subconjunto *validação*. Calcule a média dos quadrados dos resíduos. A raíz quadrada deste valor é conhecida como *RMSE* (*root mean square error*).
+
+Compare *RMSE* do subconjunto *validação* com o *RMSE* do subconjunto *treino*.
+
+```{r}
+# coloque os comandos aqui
+
+```
