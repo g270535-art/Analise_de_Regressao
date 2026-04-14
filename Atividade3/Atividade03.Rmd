@@ -1,7 +1,7 @@
 ---
 title: "Atividade 03"
 author:
-  - Aluno 1 RA
+  - Guilherme Valverde Freiria 270535
   - Aluno 2 RA
   - Aluno 3 RA
 output:
@@ -18,15 +18,35 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo=FALSE)
 ```{r, message=FALSE}
 library(alr4)
 data("Rateprof")
+
+library(tidyverse)
+library(ggplot2)
+
+
+```
+
+```{r}
+head(Rateprof)
+```
+
+```{r}
+str(Rateprof)
+```
+
+```{r}
+cor(Rateprof[, c("quality","clarity", "helpfulness", "easiness", "raterInterest")])
 ```
 
 Apresente abaixo um gráfico similar ao apresentado no enunciado. Comente sobre as relações entre as notas dos cinco quesitos avaliados.
 
 ```{r}
-
 # seu código aqui
 
+pairs(Rateprof[, c("quality","clarity", "helpfulness", "easiness", "raterInterest")])
+
 ```
+
+Analisando a matriz de gráficos de dispersão, observa-se que os pares quality e clarity, quality e helpfulness e clarity e helpfulness apresentam forte correlação positiva. Por outro lado, as variáveis easiness e raterInterest apresentam apenas correlação moderada, sendo menos associadas às demais variáveis, como quality, clarity e helpfulness.
 
 \newpage
 
@@ -37,11 +57,31 @@ library(moderndive)
 data(MA_schools)
 ```
 
+```{r}
+names(MA_schools)
+```
+
 A)  Explique o que são as variáveis `average_sat_math` e `perc_disadvan`. Apresente estatísticas sumárias das duas variáveis de interesse, inclua o tamanho amostra. Apresente um diagrama de dispersão e use o mesmo para argumentar sobre uma regressão linear simples nos dados parecer ou não apropriada e qual seria o objetivo do modelo.
 
 ```{r}
 # coloque os comandos  aqui
 # gráficos devem ter "labels" adequados nos eixos, o nome bruto da variável, como indicado na coluna do dataset não deve ser apresentado no gráfico e/ou tabelas. 
+
+dados_df <- MA_schools[, c("average_sat_math", "perc_disadvan" )]
+
+summary(dados_df)
+
+n = nrow((dados_df)) #Tamanho da amostra
+
+ggplot(dados_df, aes(x = perc_disadvan, y = average_sat_math)) +
+  geom_point() +
+  labs(
+    title = "Relação entre desvantagem e desempenho",
+    x = "Percentual de alunos desfavorecidos",
+    y = "Média SAT matemática"
+  )+
+  theme(plot.title = element_text(hjust = 0.5))
+
 
 ```
 
@@ -53,6 +93,33 @@ B)  Calcule, usando o R, os valores de $\bar{x}$, $\bar{y}$, $S_{XX}$, $S_{YY}$,
 # usar echo=TRUE
 # apague esses comentários antes de entregar
 
+vet_x <- dados_df[["perc_disadvan"]]
+vet_y <- dados_df[["average_sat_math"]]
+
+x_barra <- mean(vet_x)
+y_barra <- mean(vet_y)
+
+sxx <- sum((vet_x - x_barra)^2)
+syy <- sum((vet_y - y_barra)^2)
+sxy <- sum((vet_x - x_barra)*(vet_y - y_barra))
+
+b1 <-  sxy/sxx
+b0 <- y_barra - b1*x_barra
+
+vet_yi <- b0 + b1*vet_x
+
+ggplot(dados_df, aes(x = perc_disadvan, y = average_sat_math)) +
+  geom_point() +
+  geom_abline(intercept = b0, slope = b1, color = 'red', size = 1)
+  labs(
+    title = "Relação entre desvantagem e desempenho",
+    x = "Percentual de alunos desfavorecidos",
+    y = "Média SAT matemática"
+  )+
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+
 ```
 
 C)  Calcule, usando o R, uma estimativa para $\sigma^2$ e encontre os erros padrões de $\hat{\beta}_0$ e $\hat{\beta}_1$. Calcule $\widehat{Cov}(\hat{\beta}_0,\hat{\beta}_1)$.
@@ -62,6 +129,14 @@ C)  Calcule, usando o R, uma estimativa para $\sigma^2$ e encontre os erros padr
 # nao usar a função lm aqui
 # usar echo=TRUE
 # apague esses comentários antes de entregar
+
+SQE <- sum((vet_y - vet_yi)^2)
+s2 <- SQE/n-2
+
+errop_b1 <- sqrt(s2/sxx)
+errop_b0 <- sqrt(s2*((1/n) + (x_barra^2)/sxx))
+
+covb0b1 <- (-s2)*(x_barra/sxx)
 ```
 
 D)  Calcule, usando o R, a estatística do teste para $H_0: \beta_1=0$. Apresente o p-valor para o teste bilateral. Descreva e interprete o resultado em termos do problema.
