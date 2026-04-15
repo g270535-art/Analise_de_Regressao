@@ -131,10 +131,13 @@ C)  Calcule, usando o R, uma estimativa para $\sigma^2$ e encontre os erros padr
 # apague esses comentários antes de entregar
 
 SQE <- sum((vet_y - vet_yi)^2)
-s2 <- SQE/n-2
+s2 <- SQE/(n-2)
 
-errop_b1 <- sqrt(s2/sxx)
-errop_b0 <- sqrt(s2*((1/n) + (x_barra^2)/sxx))
+varb1 <- s2/sxx
+varb0 <- s2*((1/n) + (x_barra^2)/sxx)
+
+errop_b1 <- sqrt(varb1)
+errop_b0 <- sqrt(varb0)
 
 covb0b1 <- (-s2)*(x_barra/sxx)
 ```
@@ -145,6 +148,13 @@ D)  Calcule, usando o R, a estatística do teste para $H_0: \beta_1=0$. Apresent
 # coloque os comandos para os cálculos
 # nao usar a função lm aqui
 # escreva no texto com r inline os resultados da estatística do teste, do p-valor, etc...
+
+tobs <- (b1 - 0)/errop_b1
+graus_liberdade <- n-2
+
+p_valor <- 2 * pt(-abs(tobs), df = graus_liberdade) #funcao acumulada da t
+
+p_valor
 ```
 
 E)  Calcule, usando o R, um intervalo de confiança de 95% para $\beta_1$. Descreva e interprete o resultado em termos do problema.
@@ -153,6 +163,11 @@ E)  Calcule, usando o R, um intervalo de confiança de 95% para $\beta_1$. Descr
 # coloque os comandos para os cálculos
 # nao usar a função lm aqui
 
+t_tabela <- qt(0.975, df = graus_liberdade) #acumulada da t-student
+
+ic <- c(b1 - t_tabela*errop_b1, b1 + t_tabela*errop_b1)
+
+ic
 ```
 
 F)  Apresente os resultados usando as funções `lm`, `vcov` e `confint`.
@@ -160,6 +175,12 @@ F)  Apresente os resultados usando as funções `lm`, `vcov` e `confint`.
 ```{r}
 # coloque os comandos para os cálculos
 
+modelo <- lm(vet_y ~ vet_x)
+summary(modelo)
+
+vcov(modelo)
+
+confint(modelo)
 ```
 
 \newpage
@@ -174,12 +195,37 @@ library(moderndive)
 data(un_member_states_2024)
 ```
 
+```{r}
+head(un_member_states_2024)
+
+names(un_member_states_2024)
+```
+
+
 A)  Apresente estatísticas sumárias e gráficos adequados. Ao apresentar cada resultado, mencione o propósito, relacionando ao problema e aos próximos passos que você tomará na modelagem.
 
 ```{r}
 library(tidyverse)
 
 # tidy_summary pode ajudar aqui e demais funçoes do tidyverse
+
+dados2 <- un_member_states_2024[, c("life_expectancy_2022", "fertility_rate_2022" )]
+
+dados2 <- na.omit(dados2) #Remove dados faltantes
+n2 <- nrow(dados2)
+
+vet_x2 <- dados2[["life_expectancy_2022"]]
+vet_y2 <- dados2[["fertility_rate_2022"]]
+
+
+summary(dados2)
+
+ggplot(data = dados2, aes(x = life_expectancy_2022, y = fertility_rate_2022))+
+  geom_point()+
+  labs(title= "Relação entre a taxa de fertilidade e a expectativa de vida ", x = "Expectativa de vida",
+  y = "Taxa de fertilidade" )+
+  theme(plot.title = element_text(hjust = 0.5))
+  
 
 ```
 
@@ -188,6 +234,16 @@ B)  Ajuste um modelo de regressão linear simples adequado para o problema. Apre
 ```{r}
 # coloque os comandos para os cálculos
 
+modelo2 <- lm(vet_y2 ~ vet_x2)
+summary(modelo2)$adj.r.squared
+anova(modelo2)
+
+ggplot(data = dados2, aes(x = life_expectancy_2022, y = fertility_rate_2022))+
+  geom_smooth(method="lm", se = FALSE, color = "red")+
+  geom_point()+
+  labs(title= "Relação entre a taxa de fertilidade e a expectativa de vida ", x = "Expectativa de vida",
+  y = "Taxa de fertilidade" )+
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 C)  Apresente um intervalo de confiança para $\beta_1$ de 95%. Descreva e interprete o resultado em termos do problema.
@@ -195,6 +251,7 @@ C)  Apresente um intervalo de confiança para $\beta_1$ de 95%. Descreva e inter
 ```{r}
 # coloque os comandos para os cálculos
 
+confint(modelo2)
 ```
 
 D)  Apresente um intervalo de confiança de 95% para a taxa de fertilidade média entre países em que a expectativa de vida é de 70 anos. Descreva e interprete o resultado em termos do problema.
@@ -202,12 +259,21 @@ D)  Apresente um intervalo de confiança de 95% para a taxa de fertilidade médi
 ```{r}
 # coloque os comandos para os cálculos
 
+predict(modelo2, 
+        newdata = data.frame(vet_x2 = 70),
+        interval = "confidence")[, c("lwr", "upr")]
+
+
 ```
 
 E)  Apresente um intervalo de predição de 95% para a taxa de fertilidade de um país em que a expectativa de vida é de 70 anos. Descreva e interprete o resultado em termos do problema.
 
 ```{r}
 # coloque os comandos para os cálculos
+predict(modelo2,
+        newdata = data.frame(vet_x2 = 70),
+        interval = "prediction",
+        level = 0.95)[, c("lwr", "upr")]
 
 ```
 
@@ -220,6 +286,22 @@ A)  Considere o conjunto de dados do **Exercício 2**. Selecione, ao acaso, apro
 ```{r}
 # coloque os comandos
 
+set.seed(123)
+
+n2 <- length(vet_x2)
+treino_idx <- sample(1:n2, size = round(2*n2/3), replace = FALSE)
+
+x_treino <- vet_x2[treino_idx]
+y_treino <- vet_y2[treino_idx]
+
+x_valid <- vet_x2[-treino_idx]
+y_valid <- vet_y2[-treino_idx]
+
+modelo3 <- lm(y_treino ~ x_treino)
+summary(modelo3)
+
+pred_valid <- predict(modelo3, newdata = data.frame(x_treino = x_valid))
+
 ```
 
 B)  Considerando o modelo de regressão ajustado, obtenha predições para a variável resposta usando os valores dos preditores do subconjunto *validação*. Calcule a média dos quadrados dos resíduos. A raíz quadrada deste valor é conhecida como *RMSE* (*root mean square error*).
@@ -229,4 +311,14 @@ Compare *RMSE* do subconjunto *validação* com o *RMSE* do subconjunto *treino*
 ```{r}
 # coloque os comandos aqui
 
+
+
+res_valid <- y_valid - pred_valid
+rmse_valid <- sqrt(mean(res_valid^2))
+
+res_treino <- y_treino - predict(modelo3)
+rmse_treino <- sqrt(mean(res_treino^2))
+
+rmse_treino
+rmse_valid
 ```
