@@ -4,7 +4,9 @@ subtitle: "ME613"
 output: pdf_document
 ---
 
-
+```{r}
+library(ggplot2)
+```
 
 O comprimento da mão e altura foram medidos (em polegadas) para 167 universitários. Para importar os dados:
 
@@ -12,35 +14,94 @@ O comprimento da mão e altura foram medidos (em polegadas) para 167 universitá
 dados <- read.table("handheight.txt", header = TRUE)
 ```
 
-A) Apresente um gráfico de dispersão, incluindo a reta de regressão linear ajustada para a altura em função do comprimento da mão. Interprete os resultados.
+```{r}
+head(dados)
+```
 
 
-B) Apresente as estimativas, respectivos erros-padrão, coeficiente de determinação e estimativa da variância do erro.
+A)  Apresente um gráfico de dispersão, incluindo a reta de regressão linear ajustada para a altura em função do comprimento da mão. Interprete os resultados.
+
+```{r}
+
+df <- dados[, c("Height", "HandSpan")]
+
+summary(modelo)
+
+ggplot(data = df, mapping = aes(x = HandSpan, y = Height))+
+  geom_smooth(method="lm", se = FALSE, color = "red")+
+  geom_point()+
+  labs(title = "Relação entre altura e comprimento da mão",
+       x = "Comprimento da mão",
+       y = "Altura")+
+  theme(plot.title = element_text(hjust = 0.5))
+```
 
 
-C) Apresente a tabela de análise de variância para a reta ajustada.
+B)  Apresente as estimativas, respectivos erros-padrão, coeficiente de determinação e estimativa da variância do erro.
+
+```{r}
+
+x <- c(df[["Height"]])
+y <- c(df[["HandSpan"]])
+
+n <- nrow(df)
+modelo <- lm(y ~ x)
+summary(modelo)
+
+sxx = sum((x - mean(x))^2)
+sxy = sum((x - mean(x))*(y - mean(y)))
+
+b1 <- sxy/sxx
+b0 <- mean(y) - b1*mean(x)
+
+yi <- b0 + b1*x
+
+SQE <- sum((y -yi)^2)
+
+s2 <- SQE/(n-2)
+
+varb1 <- s2/sxx
+varb0 <- s2*(1/n + (mean(x)^2)/sxx)
+covb0b1 <- -s2*(mean(x)/sxx)
+
+errob0 <-sqrt(varb0)
+errob1 <- sqrt(varb1)
+
+SQReg <- sum((yi - mean(y))^2)
+SQT <- sum((y - mean(y))^2)
+
+R2 =  SQReg/SQT
+```
 
 
-D) Apresente os valores para $SQReg$, $SQE$ e $SQT$.
+C)  Apresente a tabela de análise de variância para a reta ajustada.
 
-E) Caso seja possível, apresente um teste de falta de ajuste utilizando a abordagem de comparar os modelos completo e reduzido. Apresente a tabela indicando a decomposição da $SQE$ em $SQFA$ e $SQEp$. Indique quais hipóteses estão sendo testadas, a estatística do teste e conclusão.
-
-F) Apresente gráficos para diagnóstico do modelo. Comente cada um deles, especificando o objetivo de cada um no diagnóstico, e suas conclusões.
-
-G) Apresente testes estatísticos apropriados para diagnóstico do modelo. Comente cada um deles, especificando as hipóteses e suas conclusões.
+```{r}
+anova(modelo)
+```
 
 
-H) Depois de verificar as suposições do modelo através da análise dos resíduos, é possível testar a hipótese para checar se a relação linear entre `HandSpan` e `Height` é significativa? Em caso positivo, apresente o teste de hipótese em detalhes e o resultado obtido. Qual a conclusão?
+D)  Apresente os valores para $SQReg$, $SQE$ e $SQT$.
 
-I) Explique a relação do teste t para $\beta_1$ e o teste F que aparece nos resultados do comando `lm`.
+```{r}
 
-
-J) Qual é a altura média de estudantes cuja largura do palmo é 17, 21 e 24 polegadas, respectivamente. Apresente também um intervalo de $95\%$ de confiança para estes casos.
-
-
-K) Para um novo estudante, qual a estimativa de sua altura dado que sua largura do palmo é 17, 21 e 24 polegadas, respectivamente. Apresente também um intervalo de predição de $95\%$ para esses casos. Compare com os intervalos de confiança obtidos no item anterior. 
-
-L) Apresente um gráfico de dispersão, juntamente com a reta ajustada e a banda de confiança para estimação da resposta média e o intervalo de predição para uma nova observação, ambos com nível de confiança de $95\%$.
+```
 
 
-M) Imagine que este modelo esteja sendo usado na UPA (Unicamp de Portas Abertas) para uma atividade com os alunos visitantes. Cada aluno visitante tem a largura do palmo da mão medido e os graduandos em estatística têm que advinhar a altura do aluno visitante. Indique a logística que você faria para advinhar a altura e como argumentaria com o aluno visitante sobre o resultado (correto ou não). Teria mais alguma coisa que poderia ser feita para melhorar a predição usando o mesmo conjunto de dados `handheight.txt`?
+E)  Caso seja possível, apresente um teste de falta de ajuste utilizando a abordagem de comparar os modelos completo e reduzido. Apresente a tabela indicando a decomposição da $SQE$ em $SQFA$ e $SQEp$. Indique quais hipóteses estão sendo testadas, a estatística do teste e conclusão.
+
+F)  Apresente gráficos para diagnóstico do modelo. Comente cada um deles, especificando o objetivo de cada um no diagnóstico, e suas conclusões.
+
+G)  Apresente testes estatísticos apropriados para diagnóstico do modelo. Comente cada um deles, especificando as hipóteses e suas conclusões.
+
+H)  Depois de verificar as suposições do modelo através da análise dos resíduos, é possível testar a hipótese para checar se a relação linear entre `HandSpan` e `Height` é significativa? Em caso positivo, apresente o teste de hipótese em detalhes e o resultado obtido. Qual a conclusão?
+
+I)  Explique a relação do teste t para $\beta_1$ e o teste F que aparece nos resultados do comando `lm`.
+
+J)  Qual é a altura média de estudantes cuja largura do palmo é 17, 21 e 24 polegadas, respectivamente. Apresente também um intervalo de $95\%$ de confiança para estes casos.
+
+K)  Para um novo estudante, qual a estimativa de sua altura dado que sua largura do palmo é 17, 21 e 24 polegadas, respectivamente. Apresente também um intervalo de predição de $95\%$ para esses casos. Compare com os intervalos de confiança obtidos no item anterior.
+
+L)  Apresente um gráfico de dispersão, juntamente com a reta ajustada e a banda de confiança para estimação da resposta média e o intervalo de predição para uma nova observação, ambos com nível de confiança de $95\%$.
+
+M)  Imagine que este modelo esteja sendo usado na UPA (Unicamp de Portas Abertas) para uma atividade com os alunos visitantes. Cada aluno visitante tem a largura do palmo da mão medido e os graduandos em estatística têm que advinhar a altura do aluno visitante. Indique a logística que você faria para advinhar a altura e como argumentaria com o aluno visitante sobre o resultado (correto ou não). Teria mais alguma coisa que poderia ser feita para melhorar a predição usando o mesmo conjunto de dados `handheight.txt`?
