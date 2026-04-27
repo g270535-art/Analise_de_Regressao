@@ -25,7 +25,6 @@ A)  Apresente um gráfico de dispersão, incluindo a reta de regressão linear a
 
 df <- dados[, c("Height", "HandSpan")]
 
-summary(modelo)
 
 ggplot(data = df, mapping = aes(x = HandSpan, y = Height))+
   geom_smooth(method="lm", se = FALSE, color = "red")+
@@ -84,24 +83,190 @@ anova(modelo)
 D)  Apresente os valores para $SQReg$, $SQE$ e $SQT$.
 
 ```{r}
-
+anova(modelo)["x", "Sum Sq"]
 ```
 
 
 E)  Caso seja possível, apresente um teste de falta de ajuste utilizando a abordagem de comparar os modelos completo e reduzido. Apresente a tabela indicando a decomposição da $SQE$ em $SQFA$ e $SQEp$. Indique quais hipóteses estão sendo testadas, a estatística do teste e conclusão.
 
+```{r}
+library(EnvStats)
+anovaPE(modelo)
+```
+Analisando a tabela para a falta de ajuste, temos que  
+
+```{r}
+full = lm(y ~ as.factor(x) - 1)
+summary(full)
+```
+
+```{r}
+reduced = lm(y ~ x)
+summary(reduced)
+```
+```{r}
+anova(reduced, full)
+
+```
+```{r}
+c = 25
+f = ((279.25 - 238.19)/(c-2))/ (238.19/(n-c))
+```
+
+
 F)  Apresente gráficos para diagnóstico do modelo. Comente cada um deles, especificando o objetivo de cada um no diagnóstico, e suas conclusões.
+
+```{r}
+res <- residuals(modelo)
+res2 <- residuals(modelo)*sqrt(s2)
+
+dados <- data.frame(x = x, res = res)
+
+ggplot(dados, aes(x = x, y = res)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "x", y = "Resíduos", title = "Resíduos vs x") +
+  theme_minimal()
+
+hist(res,
+     main = "Histograma",
+     xlab = "Valores",
+     col = "blue",
+     border = "white")
+
+plot(modelo)
+```
+
 
 G)  Apresente testes estatísticos apropriados para diagnóstico do modelo. Comente cada um deles, especificando as hipóteses e suas conclusões.
 
+```{r}
+shapiro.test(residuals(modelo)) #nORMALIDADE DOS rESÍDOUS
+qqnorm(residuals(modelo))
+qqline(residuals(modelo))
+
+
+library(lmtest)
+bptest(modelo)
+```
+
+
 H)  Depois de verificar as suposições do modelo através da análise dos resíduos, é possível testar a hipótese para checar se a relação linear entre `HandSpan` e `Height` é significativa? Em caso positivo, apresente o teste de hipótese em detalhes e o resultado obtido. Qual a conclusão?
+
+```{r}
+summary(modelo)
+anova(modelo)
+```
 
 I)  Explique a relação do teste t para $\beta_1$ e o teste F que aparece nos resultados do comando `lm`.
 
+No modelo de regressão linear simples, o teste t para β
+1
+	​
+
+ e o teste F global da regressão testam a mesma hipótese nula H
+0
+	​
+
+:β
+1
+	​
+
+=0. Nesse caso, as estatísticas estão relacionadas por F=t
+2
+, de modo que ambos os testes produzem o mesmo p-valor e a mesma conclusão. O teste t avalia diretamente o coeficiente angular, enquanto o teste F compara a variabilidade explicada pelo modelo com a variabilidade residual.
+
+
 J)  Qual é a altura média de estudantes cuja largura do palmo é 17, 21 e 24 polegadas, respectivamente. Apresente também um intervalo de $95\%$ de confiança para estes casos.
+
+```{r}
+
+altura <- c(17, 21, 24)
+altura_media <- b0 + b1*altura
+
+altura_media
+
+predict(modelo,
+        newdata = data.frame(x = c(17,21,24)),
+        interval = "confidence")[, c("lwr", "upr")]
+
+
+```
+
 
 K)  Para um novo estudante, qual a estimativa de sua altura dado que sua largura do palmo é 17, 21 e 24 polegadas, respectivamente. Apresente também um intervalo de predição de $95\%$ para esses casos. Compare com os intervalos de confiança obtidos no item anterior.
 
+```{r}
+altura <- c(17, 21, 24)
+altura_predita <- b0 + b1*altura
+
+altura_predita
+
+predict(modelo,
+        newdata = data.frame(x = c(17,21,24)),
+        interval = "prediction")[, c("lwr", "upr")]
+```
+
+
 L)  Apresente um gráfico de dispersão, juntamente com a reta ajustada e a banda de confiança para estimação da resposta média e o intervalo de predição para uma nova observação, ambos com nível de confiança de $95\%$.
+```{r}
+
+# Grade de valores para desenhar as bandas
+novo_x <- data.frame(
+  x = seq(min(x), max(x), length.out = 200)
+)
+
+# Intervalo de confiança da média
+ic <- predict(modelo,
+              newdata = novo_x,
+              interval = "confidence",
+              level = 0.95)
+
+# Intervalo de predição
+ip <- predict(modelo,
+              newdata = novo_x,
+              interval = "prediction",
+              level = 0.95)
+
+# Junta tudo
+dados_plot <- data.frame(
+  x   = novo_x$x,
+  fit = ic[, "fit"],
+  ic_lwr = ic[, "lwr"],
+  ic_upr = ic[, "upr"],
+  ip_lwr = ip[, "lwr"],
+  ip_upr = ip[, "upr"]
+)
+
+# Gráfico
+ggplot() +
+  
+  # pontos observados
+  geom_point(aes(x = x, y = y), size = 2) +
+  
+  # banda intervalo de predição (mais larga)
+  geom_ribbon(data = dados_plot,
+              aes(x = x, ymin = ip_lwr, ymax = ip_upr),
+              alpha = 0.20) +
+  
+  # banda intervalo de confiança da média
+  geom_ribbon(data = dados_plot,
+              aes(x = x, ymin = ic_lwr, ymax = ic_upr),
+              alpha = 0.35) +
+  
+  # reta ajustada
+  geom_line(data = dados_plot,
+            aes(x = x, y = fit),
+            linewidth = 1) +
+  
+  labs(
+    title = "Dispersão, reta ajustada e bandas de 95%",
+    x = "x",
+    y = "y"
+  ) +
+  
+  theme_minimal()
+```
+
 
 M)  Imagine que este modelo esteja sendo usado na UPA (Unicamp de Portas Abertas) para uma atividade com os alunos visitantes. Cada aluno visitante tem a largura do palmo da mão medido e os graduandos em estatística têm que advinhar a altura do aluno visitante. Indique a logística que você faria para advinhar a altura e como argumentaria com o aluno visitante sobre o resultado (correto ou não). Teria mais alguma coisa que poderia ser feita para melhorar a predição usando o mesmo conjunto de dados `handheight.txt`?
